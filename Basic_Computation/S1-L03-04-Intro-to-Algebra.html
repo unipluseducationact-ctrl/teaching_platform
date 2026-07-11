@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pre S1 代數互動教具 🎮</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; font-family:"Segoe UI","Microsoft JhengHei",sans-serif; }
+  body { background:linear-gradient(135deg,#2b1055,#4a2d8f); min-height:100vh; color:#fff; padding:16px; }
+  h1 { text-align:center; font-size:1.6rem; margin-bottom:12px; text-shadow:0 2px 6px rgba(0,0,0,.4); }
+
+  /* ── 分頁 ── */
+  .tabs { display:flex; justify-content:center; gap:8px; margin-bottom:18px; flex-wrap:wrap; }
+  .tab-btn { padding:12px 18px; border:none; border-radius:30px; font-size:.95rem; font-weight:bold;
+    cursor:pointer; background:rgba(255,255,255,.15); color:#fff; transition:.25s; }
+  .tab-btn:hover { background:rgba(255,255,255,.3); transform:translateY(-2px); }
+  .tab-btn.active { background:#ffcc00; color:#2b1055; box-shadow:0 4px 12px rgba(255,204,0,.4); }
+
+  .panel { display:none; max-width:920px; margin:0 auto; background:rgba(255,255,255,.1);
+    border-radius:18px; padding:20px; backdrop-filter:blur(6px); }
+  .panel.active { display:block; animation:fadeIn .4s; }
+  @keyframes fadeIn { from{opacity:0; transform:translateY(10px);} to{opacity:1;} }
+
+  .btn { padding:10px 20px; border:none; border-radius:10px; font-size:1rem; font-weight:bold;
+    cursor:pointer; transition:.2s; }
+  .btn:active { transform:scale(.95); }
+  .btn-go { background:#ffcc00; color:#2b1055; }
+  .btn-blue { background:#4dabf7; color:#fff; }
+  .btn-red { background:#ff6b6b; color:#fff; }
+  .hint-text { text-align:center; opacity:.85; font-size:.9rem; margin-top:10px; }
+  .fb { text-align:center; font-size:1.25rem; font-weight:bold; min-height:2rem; margin-top:12px; }
+
+  /* ── 模組1：翻譯機 ── */
+  #tr-sentence { text-align:center; font-size:1.4rem; background:rgba(0,0,0,.3);
+    padding:18px; border-radius:12px; margin-bottom:14px; line-height:1.6; }
+  .tr-zone { min-height:64px; border:3px dashed rgba(255,255,255,.5); border-radius:12px;
+    display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:center; padding:10px; margin-bottom:14px; }
+  .tr-pool { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:14px; }
+  .token { padding:10px 16px; background:#fff; color:#2b1055; font-size:1.25rem; font-weight:bold;
+    border-radius:10px; cursor:pointer; user-select:none; box-shadow:0 3px 8px rgba(0,0,0,.3); transition:.15s; }
+  .token:hover { transform:translateY(-3px); background:#ffe066; }
+  .tr-zone .token { background:#4dabf7; color:#fff; }
+  .tr-zone .token:hover { background:#ff6b6b; }
+  .tr-ctrl { display:flex; justify-content:center; gap:10px; flex-wrap:wrap; }
+  #tr-progress { text-align:center; margin-bottom:10px; font-size:1rem; color:#ffcc00; font-weight:bold; }
+
+  /* ── 模組2：消消樂 ── */
+  #mg-arena { position:relative; height:340px; background:rgba(0,0,0,.25); border-radius:14px; overflow:hidden; }
+  .bubble { position:absolute; display:flex; align-items:center; justify-content:center;
+    border-radius:50%; cursor:pointer; font-weight:bold; font-size:1.15rem; color:#2b1055;
+    box-shadow:0 4px 12px rgba(0,0,0,.35); transition:transform .2s; user-select:none; }
+  .bubble:hover { transform:scale(1.1); }
+  .bubble.selected { outline:4px solid #ffcc00; transform:scale(1.12); }
+  .bubble.pop { animation:pop .35s forwards; }
+  @keyframes pop { to { transform:scale(1.6); opacity:0; } }
+  .bubble.shake { animation:shake .4s; }
+  @keyframes shake { 0%,100%{margin-left:0;} 25%{margin-left:-8px;} 75%{margin-left:8px;} }
+  .mg-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px; }
+  #mg-timer { font-size:1.4rem; font-weight:bold; color:#ffcc00; }
+
+  /* ── 模組6：點陣生成器 ── */
+  #dp-svg { width:100%; height:300px; background:rgba(0,0,0,.25); border-radius:14px; }
+  .dp-ctrl { display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-top:14px; align-items:center; }
+  .dp-ctrl input[type=range] { width:220px; accent-color:#ffcc00; }
+  .dp-ctrl input[type=text] { padding:10px; border-radius:10px; border:none; font-size:1.1rem; width:130px; text-align:center; }
+  #dp-count { text-align:center; font-size:1.2rem; margin-top:10px; font-weight:bold; }
+  #dp-nlabel { font-size:1.2rem; font-weight:bold; color:#ffcc00; min-width:70px; text-align:center; }
+  #dp-lock { text-align:center; font-size:.95rem; color:#ff8787; margin-top:6px; }
+
+  /* ── 模組5：代入機 + 黑盒 ── */
+  .bb-section { border:2px solid rgba(255,255,255,.25); border-radius:14px; padding:16px; margin-bottom:18px; }
+  .bb-section h2 { text-align:center; font-size:1.2rem; margin-bottom:12px; color:#ffcc00; }
+  .bb-machine { position:relative; display:flex; align-items:center; justify-content:center; gap:14px; margin:18px 0; flex-wrap:wrap; }
+  .bb-box { width:170px; height:110px; background:#222; border-radius:16px; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; font-size:1.7rem; box-shadow:0 0 24px rgba(255,204,0,.35);
+    border:3px solid #ffcc00; transition:transform .15s; }
+  .bb-box small { font-size:.8rem; color:#ffcc00; margin-top:4px; }
+  .bb-box.crunch { animation:crunch .5s; }
+  @keyframes crunch { 0%,100%{transform:scale(1);} 30%{transform:scale(1.12) rotate(-2deg);} 60%{transform:scale(.94) rotate(2deg);} }
+  .bb-arrow { font-size:2rem; color:#ffcc00; }
+  .bb-io { background:rgba(255,255,255,.15); padding:12px 18px; border-radius:12px; font-size:1.15rem;
+    line-height:1.9; min-width:100px; text-align:center; }
+  .bb-io b { color:#ffcc00; }
+  .bb-nbtns { display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin-bottom:8px; }
+  .nbtn { width:56px; height:56px; border-radius:50%; border:none; font-size:1.3rem; font-weight:bold;
+    background:#4dabf7; color:#fff; cursor:pointer; transition:.2s; }
+  .nbtn:hover { transform:scale(1.12); background:#74c0fc; }
+  .nbtn:disabled { opacity:.4; cursor:not-allowed; }
+  #fly-num { position:absolute; font-size:1.8rem; font-weight:bold; color:#ffd43b;
+    pointer-events:none; opacity:0; z-index:5; transition:none; }
+  #sub-history { text-align:center; font-size:1.1rem; margin-top:8px; line-height:1.8; }
+  #sub-history span { background:rgba(255,255,255,.15); padding:4px 10px; border-radius:8px; margin:0 4px; display:inline-block; }
+  .bb-guess { display:flex; justify-content:center; gap:10px; flex-wrap:wrap; align-items:center; margin-top:8px; }
+  .bb-guess input { padding:10px; border-radius:10px; border:none; font-size:1.2rem; width:180px; text-align:center; }
+  #bb-tries { text-align:center; margin-top:8px; color:#ffcc00; }
+</style>
+</head>
+<body>
+
+<h1>🎮 Pre S1 代數互動教具</h1>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab(0,this)">1️⃣ Word Translator</button>
+  <button class="tab-btn" onclick="showTab(1,this)">2️⃣ 同類項消消樂</button>
+  <button class="tab-btn" onclick="showTab(2,this)">3️⃣ 點陣生成器</button>
+  <button class="tab-btn" onclick="showTab(3,this)">4️⃣ 代入機 & 黑盒</button>
+</div>
+
+<!-- ═══ 模組 1：翻譯機（全英文題目）═══ -->
+<div class="panel active" id="panel0">
+  <div id="tr-progress"></div>
+  <div id="tr-sentence"></div>
+  <div class="tr-zone" id="tr-zone"></div>
+  <div class="tr-pool" id="tr-pool"></div>
+  <div class="tr-ctrl">
+    <button class="btn btn-go" onclick="checkTranslate()">✔ Check</button>
+    <button class="btn btn-red" onclick="clearZone()">✖ Clear</button>
+    <button class="btn btn-blue" onclick="nextTranslate()">➡ Next</button>
+  </div>
+  <div class="fb" id="tr-fb"></div>
+</div>
+
+<!-- ═══ 模組 2：消消樂 ═══ -->
+<div class="panel" id="panel1">
+  <div class="mg-top">
+    <div id="mg-timer">⏱ --</div>
+    <div id="mg-target" style="font-size:1.05rem;"></div>
+    <button class="btn btn-go" onclick="startMerge()">🚀 開始 / 重玩</button>
+  </div>
+  <div id="mg-arena"></div>
+  <div class="fb" id="mg-fb"></div>
+  <p class="hint-text">💡 撳兩個「同類項」泡泡合併。顏色係隨機嘅，唔好靠顏色，要睇清楚係咪同類！</p>
+</div>
+
+<!-- ═══ 模組 6：點陣生成器 ═══ -->
+<div class="panel" id="panel2">
+  <svg id="dp-svg" viewBox="0 0 800 300"></svg>
+  <div id="dp-count"></div>
+  <div class="dp-ctrl">
+    <span>圖形編號 n：</span>
+    <input type="range" id="dp-slider" min="1" max="4" value="1" oninput="dpSlide()">
+    <span id="dp-nlabel">n = 1</span>
+  </div>
+  <div id="dp-lock">🔒 目前只可以睇 n = 1 至 4。估中第 5 個圖嘅點數，就會解鎖 n = 5 至 25！</div>
+  <div class="dp-ctrl">
+    <input type="text" id="dp-guess" placeholder="第5個圖有幾多點？">
+    <button class="btn btn-go" onclick="dpCheck()">🎯 估估下</button>
+    <button class="btn btn-blue" onclick="dpNewPattern()">🎲 換一個 Pattern</button>
+  </div>
+  <div class="fb" id="dp-fb"></div>
+</div>
+
+<!-- ═══ 模組 5：代入機 + 黑盒 ═══ -->
+<div class="panel" id="panel3">
+
+  <!-- Part A：代入機（睇住個數入機器）-->
+  <div class="bb-section">
+    <h2>🅰 代入機 — 揀一個 n，睇住佢入機器！</h2>
+    <div class="bb-nbtns" id="sub-nbtns"></div>
+    <div class="bb-machine" id="sub-machine">
+      <div class="bb-io" id="sub-in">n = ?</div>
+      <div class="bb-arrow">➡</div>
+      <div class="bb-box" id="sub-box"><span id="sub-formula">Tn = 3n − 1</span><small>代入機</small></div>
+      <div class="bb-arrow">➡</div>
+      <div class="bb-io" id="sub-out">?</div>
+      <div id="fly-num"></div>
+    </div>
+    <div id="sub-history"></div>
+    <div style="text-align:center;margin-top:10px;">
+      <button class="btn btn-blue" onclick="subNewFormula()">🎲 換一條式</button>
+    </div>
+  </div>
+
+  <!-- Part B：黑盒挑戰 -->
+  <div class="bb-section">
+    <h2>🅱 黑盒挑戰 — 依家到你猜機器入面條式！</h2>
+    <div class="bb-machine">
+      <div class="bb-io">輸入<br><b>n = 1,2,3,4</b></div>
+      <div class="bb-arrow">➡</div>
+      <div class="bb-box">❓<small>神秘機器</small></div>
+      <div class="bb-arrow">➡</div>
+      <div class="bb-io" id="bb-output">…</div>
+    </div>
+    <div class="bb-guess">
+      <span style="font-size:1.2rem;">我猜 Tn =</span>
+      <input type="text" id="bb-input" placeholder="例：3n-1 或 n^2">
+      <button class="btn btn-go" onclick="bbCheck()">🔍 測試猜想</button>
+      <button class="btn btn-blue" onclick="bbNew()">🎲 換新機器</button>
+    </div>
+    <div id="bb-tries"></div>
+    <div class="fb" id="bb-fb"></div>
+    <p class="hint-text">💡 支援寫法：3n-1、n^2、n^2+1、4n、n(n+1)/2 等。</p>
+  </div>
+</div>
+<script>
+/* ═══════════ 分頁切換 ═══════════ */
+function showTab(i, btn){
+  document.querySelectorAll('.panel').forEach((p,idx)=>p.classList.toggle('active', idx===i));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+const shuffle = a => [...a].sort(()=>Math.random()-.5);
+
+/* ═══════════ 模組 1：Word Translator（全英文題目，答啱先出中文解釋）═══════════ */
+const TR_QS = [
+  { s:'Add <b>m</b> to <b>n</b>, then divide the sum by <b>c</b>.',
+    ans:[['(','n','+','m',')','÷','c'],['(','m','+','n',')','÷','c']],
+    tokens:['(','n','+','m',')','÷','c','×','−'],
+    zh:'「將 m 加落 n 度，再將個和除以 c」→ 記住個「和 sum」要加括號先除！' },
+  { s:'Divide the sum of <b>5h</b> and <b>g</b> by <b>4</b>.',
+    ans:[['(','5h','+','g',')','÷','4'],['(','g','+','5h',')','÷','4']],
+    tokens:['(','5h','+','g',')','÷','4','×','5'],
+    zh:'「將 5h 同 g 嘅和除以 4」→ sum of A and B = (A + B)。' },
+  { s:'Subtract <b>x</b> from the product of <b>a</b> and <b>b</b>.',
+    ans:[['a','b','−','x'],['b','a','−','x']],
+    tokens:['a','b','−','x','+','÷','('],
+    zh:'「由 a 同 b 嘅積減去 x」→ subtract x FROM ab，係 ab − x，唔係 x − ab！' },
+  { s:'Multiply the square of <b>p</b> by <b>q</b>.',
+    ans:[['p²','×','q'],['q','×','p²'],['p²','q']],
+    tokens:['p²','×','q','p','2','+'],
+    zh:'「p 嘅平方乘以 q」→ square of p = p²，再乘 q。' },
+  { s:'Siu Fung had <b>$55</b> and has spent <b>$x</b>. How much does she have left?',
+    ans:[['55','−','x']],
+    tokens:['55','−','x','+','÷','('],
+    zh:'「有 $55，用咗 $x，剩返幾多」→ 原本 − 用咗 = 55 − x。' },
+  { s:'Each box contains <b>n</b> oranges 🍊. How many oranges are there in <b>4</b> boxes?',
+    ans:[['4','n'],['n','×','4'],['4','×','n']],
+    tokens:['4','n','×','+','−','÷'],
+    zh:'「每盒 n 個橙，4 盒有幾多個」→ 4 × n，簡寫做 4n。' },
+  { s:'A bottle of juice of volume <b>e</b> mL is divided equally into <b>8</b> glasses 🥤. How much is in each glass?',
+    ans:[['e','÷','8']],
+    tokens:['e','÷','8','×','−','('],
+    zh:'「e mL 平均分 8 杯」→ e ÷ 8，即係 e/8。' },
+  { s:'The elder brother is <b>x</b> years old. His little brother is <b>3</b> years younger. How old will the little brother be <b>2</b> years later?',
+    ans:[['x','−','3','+','2'],['x','−','1']],
+    tokens:['x','−','3','+','2','1','×'],
+    zh:'「細 3 年 → x − 3；兩年後 → 再 + 2」，所以係 x − 3 + 2 = x − 1。' },
+];
+let trIdx = -1, trZone = [];
+
+function nextTranslate(){
+  trIdx = (trIdx + 1) % TR_QS.length;
+  trZone = [];
+  const q = TR_QS[trIdx];
+  document.getElementById('tr-progress').textContent = `Question ${trIdx+1} / ${TR_QS.length}`;
+  document.getElementById('tr-sentence').innerHTML = q.s;
+  document.getElementById('tr-fb').textContent = '';
+  renderZone();
+  const pool = document.getElementById('tr-pool');
+  pool.innerHTML = '';
+  shuffle(q.tokens).forEach(t => {
+    const el = document.createElement('div');
+    el.className = 'token'; el.textContent = t;
+    el.onclick = () => { trZone.push(t); renderZone(); };
+    pool.appendChild(el);
+  });
+}
+function renderZone(){
+  const z = document.getElementById('tr-zone');
+  if(trZone.length === 0){
+    z.innerHTML = '<span style="opacity:.5">👆 Tap the blocks below to build the expression</span>';
+    return;
+  }
+  z.innerHTML = '';
+  trZone.forEach((t,i) => {
+    const el = document.createElement('div');
+    el.className = 'token'; el.textContent = t;
+    el.title = 'Tap to remove';
+    el.onclick = () => { trZone.splice(i,1); renderZone(); };
+    z.appendChild(el);
+  });
+}
+function clearZone(){ trZone = []; renderZone(); }
+function checkTranslate(){
+  const q = TR_QS[trIdx];
+  const fb = document.getElementById('tr-fb');
+  const ok = q.ans.some(a => a.length === trZone.length && a.every((t,i)=>t===trZone[i]));
+  if(ok){
+    fb.innerHTML = `🎉 Correct!<br><span style="font-size:1rem;color:#ffd43b">${q.zh}</span>`;
+    fb.style.color = '#51cf66';
+    setTimeout(nextTranslate, 3500);   // 留時間睇中文解釋
+  } else {
+    fb.textContent = '❌ Not quite. Try again!';
+    fb.style.color = '#ff8787';
+  }
+}
+nextTranslate();
+
+/* ═══════════ 模組 2：同類項消消樂（顏色完全隨機！）═══════════ */
+const MG_LEVELS = [
+  ['4a','+5a','−2a','+3y','+4y','−1','+3'],
+  ['+1','+3y','+2','+4y','−3n','+4n','+4','−2'],
+  ['+u','+1','−8','−3u','+9x','−3x','−1','+4'],
+  ['9b','−3b','−1','−4','+2v','+3v','+9','+2'],
+];
+let mgSel = null, mgTimer = null, mgTime = 0, mgLevel = 0;
+const COLORS = ['#ffd43b','#74c0fc','#b2f2bb','#ffa8a8','#e599f7','#ffc078','#96f2d7','#fcc2d7'];
+
+function parseTerm(t){
+  const m = t.match(/^([+\-−]?)(\d*(?:\.\d+)?)([a-z]*)$/i);
+  const sign = m[1] === '−' || m[1] === '-' ? -1 : 1;
+  const coef = m[2] === '' ? 1 : parseFloat(m[2]);
+  return { c: sign * coef, v: m[3] };
+}
+function fmtTerm(c, v, lead){
+  const sign = c < 0 ? '−' : (lead ? '' : '+');
+  const abs = Math.abs(c);
+  const co = (v !== '' && abs === 1) ? '' : abs;
+  return sign + co + v;
+}
+function startMerge(){
+  clearInterval(mgTimer);
+  mgTime = 0; mgSel = null;
+  document.getElementById('mg-fb').textContent = '';
+  mgTimer = setInterval(()=>{ mgTime++; document.getElementById('mg-timer').textContent = '⏱ ' + mgTime + 's'; }, 1000);
+  document.getElementById('mg-timer').textContent = '⏱ 0s';
+  const terms = MG_LEVELS[mgLevel % MG_LEVELS.length];
+  mgLevel++;
+  document.getElementById('mg-target').textContent = '🎯 目標：將所有同類項合併到最簡！（顏色冇提示㗎）';
+  const arena = document.getElementById('mg-arena');
+  arena.innerHTML = '';
+  const palette = shuffle(COLORS);            // ⭐ 每粒泡泡隨機配色，同 like terms 無關
+  shuffle(terms).forEach((t,i) => {
+    const p = parseTerm(t);
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    const size = 62 + Math.random()*20;
+    b.style.width = b.style.height = size + 'px';
+    b.style.left = (8 + Math.random()*78) + '%';
+    b.style.top = (5 + Math.random()*70) + '%';
+    b.style.background = palette[i % palette.length];   // ⭐ 隨機色
+    b.dataset.c = p.c; b.dataset.v = p.v;
+    b.textContent = fmtTerm(p.c, p.v, true);
+    b.onclick = () => clickBubble(b);
+    arena.appendChild(b);
+  });
+}
+function clickBubble(b){
+  if(!mgSel){ mgSel = b; b.classList.add('selected'); return; }
+  if(mgSel === b){ b.classList.remove('selected'); mgSel = null; return; }
+  const a = mgSel; mgSel = null; a.classList.remove('selected');
+  if(a.dataset.v === b.dataset.v){
+    const nc = parseFloat(a.dataset.c) + parseFloat(b.dataset.c);
+    a.classList.add('pop');
+    setTimeout(()=>{
+      a.remove();
+      if(nc === 0){ b.classList.add('pop'); setTimeout(()=>{ b.remove(); checkMergeWin(); },350); }
+      else {
+        b.dataset.c = nc;
+        b.textContent = fmtTerm(nc, b.dataset.v, true);
+        b.style.transform = 'scale(1.25)';
+        setTimeout(()=>b.style.transform='', 300);
+        checkMergeWin();
+      }
+    }, 350);
+  } else {
+    a.classList.add('shake'); b.classList.add('shake');
+    const fb = document.getElementById('mg-fb');
+    fb.textContent = '⚠️ ' + a.textContent + ' 同 ' + b.textContent + ' 唔係同類項，唔可以合併！';
+    fb.style.color = '#ff8787';
+    setTimeout(()=>{ a.classList.remove('shake'); b.classList.remove('shake'); }, 450);
+  }
+}
+function checkMergeWin(){
+  const bubbles = [...document.querySelectorAll('#mg-arena .bubble:not(.pop)')];
+  const vs = bubbles.map(b=>b.dataset.v);
+  if(new Set(vs).size === vs.length){
+    clearInterval(mgTimer);
+    const ans = bubbles
+      .sort((x,y)=> x.dataset.v === '' ? 1 : y.dataset.v === '' ? -1 : x.dataset.v.localeCompare(y.dataset.v))
+      .map((b,i)=>fmtTerm(parseFloat(b.dataset.c), b.dataset.v, i===0)).join(' ') || '0';
+    const fb = document.getElementById('mg-fb');
+    fb.innerHTML = `🏆 完成！最簡結果：<span style="color:#ffcc00">${ans}</span>　用時 ${mgTime} 秒！`;
+    fb.style.color = '#51cf66';
+  }
+}
+</script>
+<script>
+/* ═══════════ 模組 6：點陣生成器（先鎖 n=1–4）═══════════ */
+const DP_PATTERNS = [
+  { name:'神秘圖形 A', f: n => n*n,           draw:n=>squareDots(n),   formula:'n²' },
+  { name:'神秘圖形 B', f: n => 1 + 3*n,       draw:n=>armDots(n),      formula:'1 + 3n' },
+  { name:'神秘圖形 C', f: n => n*(n+1)/2,     draw:n=>triangleDots(n), formula:'n(n+1)/2' },
+  { name:'神秘圖形 D', f: n => (n+1)*(n+1)-1, draw:n=>squareMinus(n),  formula:'(n+1)² − 1' },
+];
+let dpIdx = 0, dpUnlocked = false;
+const dpSvg = document.getElementById('dp-svg');
+
+function dot(x,y,r,color='#ffd43b'){ return `<circle cx="${x}" cy="${y}" r="${r}" fill="${color}"/>`; }
+function gridR(n){ return Math.max(3, Math.min(10, 110/(n+2))); }
+function squareDots(n){
+  const r=gridR(n), gap=r*2.4, ox=400-(n-1)*gap/2, oy=150-(n-1)*gap/2;
+  let s=''; for(let i=0;i<n;i++) for(let j=0;j<n;j++) s+=dot(ox+i*gap,oy+j*gap,r); return s;
+}
+function armDots(n){
+  const r=gridR(n), gap=r*2.4;
+  let s=dot(400,150,r,'#ff8787');
+  for(let k=1;k<=n;k++){
+    s+=dot(400+k*gap,150,r);
+    s+=dot(400-k*gap*.5,150-k*gap*.87,r);
+    s+=dot(400-k*gap*.5,150+k*gap*.87,r);
+  } return s;
+}
+function triangleDots(n){
+  const r=gridR(n), gap=r*2.4, oy=150-(n-1)*gap/2;
+  let s='';
+  for(let row=1;row<=n;row++){
+    const ox=400-(row-1)*gap/2;
+    for(let i=0;i<row;i++) s+=dot(ox+i*gap,oy+(row-1)*gap,r);
+  } return s;
+}
+function squareMinus(n){
+  const m=n+1, r=gridR(m), gap=r*2.4, ox=400-(m-1)*gap/2, oy=150-(m-1)*gap/2;
+  let s='';
+  for(let i=0;i<m;i++) for(let j=0;j<m;j++)
+    if(!(i===m-1 && j===m-1)) s+=dot(ox+i*gap,oy+j*gap,r);
+  return s;
+}
+function dpDraw(){
+  const n = parseInt(document.getElementById('dp-slider').value);
+  const p = DP_PATTERNS[dpIdx];
+  document.getElementById('dp-nlabel').textContent = 'n = ' + n;
+  dpSvg.innerHTML = `<text x="400" y="28" fill="#ffcc00" font-size="18" text-anchor="middle" font-weight="bold">${p.name}　第 ${n} 個圖形</text>` + p.draw(n);
+  const cnt = document.getElementById('dp-count');
+  cnt.innerHTML = `點數 = <span style="color:#ffcc00;font-size:1.5rem">${p.f(n)}</span>` +
+    (dpUnlocked ? `　｜　規律：<span style="color:#69db7c">Tn = ${p.formula}</span>` : '　🤔 觀察 n=1 至 4，搵下規律？');
+}
+function dpSlide(){ dpDraw(); }
+function dpCheck(){
+  const g = parseFloat(document.getElementById('dp-guess').value);
+  const p = DP_PATTERNS[dpIdx];
+  const fb = document.getElementById('dp-fb');
+  if(isNaN(g)){ fb.textContent='⚠️ 請先輸入一個數字'; fb.style.color='#ff8787'; return; }
+  if(g === p.f(5)){
+    dpUnlocked = true;
+    const slider = document.getElementById('dp-slider');
+    slider.max = 25;                              // ⭐ 解鎖
+    slider.value = 5;
+    document.getElementById('dp-lock').innerHTML = '🔓 <span style="color:#69db7c">已解鎖 n = 5 至 25！拉去 n = 25 睇下有幾誇張！</span>';
+    fb.innerHTML = `🎉 估中喇！第 5 個圖有 ${p.f(5)} 點！規律係 <span style="color:#ffcc00">Tn = ${p.formula}</span>`;
+    fb.style.color = '#51cf66';
+    dpDraw();
+  } else {
+    fb.textContent = `❌ 唔係 ${g} 呀～提示：由第 1 到第 4 個圖，每次「加多咗幾多」點？`;
+    fb.style.color = '#ff8787';
+  }
+}
+function dpNewPattern(){
+  dpIdx = (dpIdx + 1) % DP_PATTERNS.length;
+  dpUnlocked = false;
+  const slider = document.getElementById('dp-slider');
+  slider.max = 4; slider.value = 1;               // ⭐ 重新上鎖
+  document.getElementById('dp-lock').innerHTML = '🔒 目前只可以睇 n = 1 至 4。估中第 5 個圖嘅點數，就會解鎖 n = 5 至 25！';
+  document.getElementById('dp-guess').value = '';
+  document.getElementById('dp-fb').textContent = '';
+  dpDraw();
+}
+dpDraw();
+
+/* ═══════════ 模組 5A：代入機（動畫版）═══════════ */
+const SUB_FORMULAS = [
+  { f:n=>3*n-1,  show:'Tn = 3n − 1',  steps:n=>`3 × ${n} − 1` },
+  { f:n=>4*n,    show:'Tn = 4n',      steps:n=>`4 × ${n}` },
+  { f:n=>n*n,    show:'Tn = n²',      steps:n=>`${n} × ${n}` },
+  { f:n=>2*n+3,  show:'Tn = 2n + 3',  steps:n=>`2 × ${n} + 3` },
+  { f:n=>-4*n+1, show:'Tn = −4n + 1', steps:n=>`−4 × ${n} + 1` },
+];
+let subIdx = 0, subBusy = false;
+
+function subInit(){
+  const div = document.getElementById('sub-nbtns');
+  div.innerHTML = '';
+  for(let n=1; n<=5; n++){
+    const b = document.createElement('button');
+    b.className = 'nbtn'; b.textContent = n;
+    b.onclick = () => subRun(n);
+    div.appendChild(b);
+  }
+  document.getElementById('sub-formula').textContent = SUB_FORMULAS[subIdx].show;
+  document.getElementById('sub-history').innerHTML = '';
+  document.getElementById('sub-in').innerHTML = 'n = ?';
+  document.getElementById('sub-out').innerHTML = '?';
+}
+function subNewFormula(){
+  subIdx = (subIdx + 1) % SUB_FORMULAS.length;
+  subInit();
+}
+function subRun(n){
+  if(subBusy) return;
+  subBusy = true;
+  document.querySelectorAll('.nbtn').forEach(b=>b.disabled=true);
+  const F = SUB_FORMULAS[subIdx];
+  const machine = document.getElementById('sub-machine');
+  const inBox  = document.getElementById('sub-in');
+  const outBox = document.getElementById('sub-out');
+  const box    = document.getElementById('sub-box');
+  const fly    = document.getElementById('fly-num');
+  inBox.innerHTML = 'n = <b>' + n + '</b>';
+  outBox.innerHTML = '?';
+
+  // 動畫：數字由入口飛入機器
+  const mRect = machine.getBoundingClientRect();
+  const iRect = inBox.getBoundingClientRect();
+  const bRect = box.getBoundingClientRect();
+  const oRect = outBox.getBoundingClientRect();
+  fly.textContent = n;
+  fly.style.transition = 'none';
+  fly.style.left = (iRect.left - mRect.left + iRect.width/2 - 10) + 'px';
+  fly.style.top  = (iRect.top - mRect.top + 8) + 'px';
+  fly.style.opacity = 1;
+
+  setTimeout(()=>{   // 飛入機器
+    fly.style.transition = 'all .8s ease-in';
+    fly.style.left = (bRect.left - mRect.left + bRect.width/2 - 10) + 'px';
+    fly.style.top  = (bRect.top - mRect.top + bRect.height/2 - 16) + 'px';
+    fly.style.transform = 'scale(.3)';
+  }, 100);
+
+  setTimeout(()=>{   // 機器攪動 + 顯示代入步驟
+    fly.style.opacity = 0;
+    box.classList.add('crunch');
+    document.getElementById('sub-formula').innerHTML = F.steps(n);
+  }, 950);
+
+  setTimeout(()=>{   // 答案由機器飛出
+    box.classList.remove('crunch');
+    const result = F.f(n);
+    fly.textContent = result;
+    fly.style.transition = 'none';
+    fly.style.left = (bRect.left - mRect.left + bRect.width/2 - 10) + 'px';
+    fly.style.top  = (bRect.top - mRect.top + bRect.height/2 - 16) + 'px';
+    fly.style.transform = 'scale(.3)';
+    fly.style.opacity = 1;
+    setTimeout(()=>{
+      fly.style.transition = 'all .7s ease-out';
+      fly.style.left = (oRect.left - mRect.left + oRect.width/2 - 10) + 'px';
+      fly.style.top  = (oRect.top - mRect.top + 8) + 'px';
+      fly.style.transform = 'scale(1)';
+    }, 50);
+  }, 1600);
+
+  setTimeout(()=>{   // 完成：顯示結果 + 加入歷史
+    fly.style.opacity = 0;
+    const result = SUB_FORMULAS[subIdx].f(n);
+    outBox.innerHTML = '<b style="font-size:1.6rem">' + result + '</b>';
+    document.getElementById('sub-formula').textContent = SUB_FORMULAS[subIdx].show;
+    const h = document.getElementById('sub-history');
+    h.innerHTML += `<span>T<sub>${n}</sub> = ${result}</span>`;
+    document.querySelectorAll('.nbtn').forEach(b=>b.disabled=false);
+    subBusy = false;
+  }, 2400);
+}
+subInit();
+
+/* ═══════════ 模組 5B：黑盒挑戰 ═══════════ */
+const BB_RULES = [
+  { f:n=>3*n-1,     show:'3n − 1' },
+  { f:n=>4*n,       show:'4n' },
+  { f:n=>n*n,       show:'n²' },
+  { f:n=>n*n+1,     show:'n² + 1' },
+  { f:n=>-4*n+1,    show:'−4n + 1' },
+  { f:n=>6*n,       show:'6n' },
+  { f:n=>2*n+3,     show:'2n + 3' },
+  { f:n=>n*(n+1)/2, show:'n(n+1)/2' },
+];
+let bbRule = null, bbTries = 0;
+
+function bbNew(){
+  bbRule = BB_RULES[Math.floor(Math.random()*BB_RULES.length)];
+  bbTries = 0;
+  const outs = [1,2,3,4].map(n => `T<sub>${n}</sub>=<b>${bbRule.f(n)}</b>`).join('　');
+  document.getElementById('bb-output').innerHTML = outs;
+  document.getElementById('bb-input').value = '';
+  document.getElementById('bb-fb').textContent = '';
+  document.getElementById('bb-tries').textContent = '已嘗試 0 次';
+}
+function bbParse(str){
+  let s = str.replace(/−/g,'-').replace(/\s/g,'');
+  if(!/^[n0-9+\-*/^().]+$/.test(s)) return null;
+  s = s.replace(/\^/g,'**')
+       .replace(/(\d)(n|\()/g,'$1*$2')
+       .replace(/(n|\))(\d|n|\()/g,'$1*$2');
+  try { const fn = new Function('n','return '+s+';'); fn(1); return fn; }
+  catch(e){ return null; }
+}
+function bbCheck(){
+  const fb = document.getElementById('bb-fb');
+  const fn = bbParse(document.getElementById('bb-input').value.trim());
+  if(!fn){ fb.textContent='⚠️ 條式睇唔明～試下例如：3n-1、n^2+1'; fb.style.color='#ff8787'; return; }
+  bbTries++;
+  document.getElementById('bb-tries').textContent = `已嘗試 ${bbTries} 次`;
+  const allMatch = [1,2,3,4,5,6].every(n => Math.abs(fn(n)-bbRule.f(n)) < 1e-9);
+  if(allMatch){
+    fb.innerHTML = `🎆 破解成功！條式係 <span style="color:#ffcc00;font-size:1.4rem">Tn = ${bbRule.show}</span>（用咗 ${bbTries} 次）`;
+    fb.style.color = '#51cf66';
+  } else {
+    const yours = [1,2,3,4].map(n=>fn(n)).join(', ');
+    fb.innerHTML = `❌ 唔啱～你條式嘅輸出係：<span style="color:#74c0fc">${yours}</span>。對比下差幾多！`;
+    fb.style.color = '#ff8787';
+  }
+}
+bbNew();
+</script>
+</body>
+</html>
