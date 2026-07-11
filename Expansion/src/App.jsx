@@ -8,9 +8,9 @@ import 'katex/dist/katex.min.css'
 import './App.css'
 
 const FOOD_IMG = {
-  y: '/images/sandwich-y.png',
-  h: '/images/bread-h.png',
-  k: '/images/bread-k.png',
+  y: `${import.meta.env.BASE_URL}images/sandwich-y.png`,
+  h: `${import.meta.env.BASE_URL}images/bread-h.png`,
+  k: `${import.meta.env.BASE_URL}images/bread-k.png`,
 }
 
 /** Shared drag payload — HTML5 getData can fail on some browsers mid-drag. */
