@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
-  ChevronLeft, ChevronRight, Menu, PackageOpen,
+  ArrowLeft, ChevronLeft, ChevronRight, Menu, PackageOpen,
   PanelLeftClose, PanelLeftOpen, RotateCcw,
 } from 'lucide-react'
 import katex from 'katex'
@@ -679,7 +679,16 @@ function App() {
                 </span>
               </button>
             </nav>
+            <a className="back-platform" href="../../index.html">
+              <ArrowLeft size={16} />
+              Back to platform
+            </a>
           </>
+        )}
+        {!sidebarOpen && (
+          <a className="back-platform collapsed" href="../../index.html" aria-label="Back to platform" title="Back to platform">
+            <ArrowLeft size={18} />
+          </a>
         )}
       </aside>
 

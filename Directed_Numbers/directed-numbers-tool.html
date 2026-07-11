@@ -38,12 +38,36 @@
     border-radius: 12px;
     padding: 6px 10px;
   }
+  .top-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
   .top h1 {
     font-size: clamp(0.95rem, 1.8vw, 1.15rem);
     font-weight: 700;
     line-height: 1.1;
     white-space: nowrap;
   }
+  .back-platform {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 10px;
+    border: 1.5px solid #d0d0d0;
+    border-radius: 8px;
+    background: #fff;
+    color: #222;
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.1;
+    min-height: 34px;
+    white-space: nowrap;
+  }
+  .back-platform:hover { border-color: #888; background: #f7f8fa; }
   .top-right {
     display: flex;
     flex-wrap: wrap;
@@ -274,7 +298,10 @@
 <body>
 
 <div class="top">
-  <h1>Directed Numbers</h1>
+  <div class="top-left">
+    <a class="back-platform" href="../index.html">← Platform</a>
+    <h1>Directed Numbers</h1>
+  </div>
   <div class="top-right">
     <div class="row chars" id="char-pick" aria-label="Choose character"></div>
     <div class="row">
