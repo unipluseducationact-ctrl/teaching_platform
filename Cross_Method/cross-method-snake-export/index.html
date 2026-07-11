@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cross Method Snake — Factorization Game</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <script defer src="factorization-game.js"></script>
+  <style>
+    :root {
+      --bg: #0f172a; --panel: #16213a; --panel2: #1b2945; --ink: #e5e7eb; --dim: #94a3b8;
+      --a: #4FC3F7; --b: #FFD54F; --ab: #81C784; --line: #28365c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; background: var(--bg); color: var(--ink);
+      font-family: "Hanken Grotesk", system-ui, sans-serif;
+    }
+    header {
+      padding: 18px 28px; border-bottom: 1px solid var(--line);
+      display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    }
+    header h1 { font-size: 22px; margin: 0; font-weight: 700; }
+    header .crumb { color: var(--dim); font-size: 13px; }
+    .back-platform {
+      display: inline-flex; align-items: center; gap: 4px; padding: 7px 12px;
+      border: 1px solid var(--line); border-radius: 999px; background: var(--panel);
+      color: var(--ink); text-decoration: none; font-size: 13px; font-weight: 600;
+    }
+    .back-platform:hover { border-color: var(--a); color: var(--a); }
+    main { padding: 20px 28px 40px; }
+    .subnav { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .chip {
+      background: var(--panel); border: 1px solid var(--line); color: var(--dim);
+      font: inherit; font-weight: 600; padding: 8px 14px; border-radius: 999px; cursor: pointer;
+      font-size: 14px;
+    }
+    .chip.active { color: #06283d; background: var(--a); border-color: var(--a); }
+    #game-blaster.hidden, #snake-game.hidden { display: none; }
+    .snake-wrap { max-width: 1120px; margin: 0 auto; }
+    .snake-how {
+      background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+      padding: 14px 18px; margin-bottom: 14px; color: #cdd6e4; line-height: 1.55;
+    }
+    .snake-how h3 { margin: 0 0 6px; color: var(--ab); font-size: 17px; }
+    .snake-hud { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-bottom: 12px; }
+    .snake-stat {
+      background: var(--panel); border: 1px solid var(--line); border-radius: 11px;
+      padding: 9px 13px; color: var(--dim); font-weight: 700;
+    }
+    .snake-stat b { color: var(--ink); font-family: "JetBrains Mono", monospace; margin-left: 5px; }
+    .snake-modes {
+      display: inline-flex; background: var(--panel); border: 1px solid var(--line);
+      border-radius: 999px; overflow: hidden;
+    }
+    .snake-mode { background: none; border: 0; color: var(--dim); font: inherit; font-weight: 800; padding: 9px 14px; cursor: pointer; }
+    .snake-mode.active { background: var(--ab); color: #06283d; }
+    .snake-btn {
+      margin-left: auto; background: var(--a); color: #06283d; border: 0; font: inherit;
+      font-weight: 800; padding: 10px 18px; border-radius: 999px; cursor: pointer;
+    }
+    .snake-btn:hover { filter: brightness(1.06); }
+    .snake-play { display: grid; grid-template-columns: minmax(0, 1fr) 180px; gap: 16px; align-items: center; }
+    @media (max-width: 840px) { .snake-play { grid-template-columns: 1fr; } .snake-pad { margin: 0 auto; } }
+    .snake-board-wrap { background: #07101f; border: 1px solid var(--line); border-radius: 16px; padding: 12px; }
+    #snake-board {
+      width: min(100%, 760px); aspect-ratio: 1 / 1; max-height: 78vh; display: block; margin: 0 auto;
+      border-radius: 12px; background: radial-gradient(circle at 50% 0%, #142442, #07101f 62%);
+    }
+    .snake-prompt {
+      margin: 0 0 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+      padding: 14px 16px; text-align: center; font-size: 20px; min-height: 58px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .snake-msg { min-height: 24px; color: var(--dim); font-size: 14px; margin-left: auto; }
+    .snake-msg.ok { color: var(--ab); font-weight: 800; }
+    .snake-msg.bad { color: #E57373; font-weight: 800; }
+    .snake-pad {
+      display: grid; grid-template-columns: repeat(3, 56px); grid-template-rows: repeat(3, 56px); gap: 8px;
+      justify-content: center; align-content: center; background: var(--panel); border: 1px solid var(--line);
+      border-radius: 16px; padding: 14px; touch-action: none;
+    }
+    .snake-pad button {
+      border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(180deg,#e2e8f0,#94a3b8);
+      color: #0f172a; font: 900 24px "JetBrains Mono", monospace; cursor: pointer;
+      box-shadow: 0 7px 15px rgba(0,0,0,.22);
+    }
+    .snake-pad button:active { transform: translateY(2px); box-shadow: 0 3px 8px rgba(0,0,0,.24); }
+    .snake-pad .up { grid-column: 2; grid-row: 1; }
+    .snake-pad .left { grid-column: 1; grid-row: 2; }
+    .snake-pad .right { grid-column: 3; grid-row: 2; }
+    .snake-pad .down { grid-column: 2; grid-row: 3; }
+    .hint { color: var(--dim); font-size: 13px; text-align: center; margin-top: 14px; }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="back-platform" href="../../index.html">← Platform</a>
+    <h1>Cross Method Snake</h1>
+    <span class="crumb">KOC S3 Math · Factorization · Cross-method practice game</span>
+  </header>
+  <main>
+    <div class="subnav">
+      <button class="chip active" data-factor-game="snake">Cross Method Snake</button>
+    </div>
+
+    <!-- Minimal hidden stub so factorization-game.js can mount -->
+    <div id="game-blaster" class="hidden" aria-hidden="true">
+      <div id="game-stage">
+        <div id="game-prompt"></div>
+        <div id="game-enemies"></div>
+        <div id="game-cannon"></div>
+        <div id="game-countdown" class="hidden"></div>
+        <div id="game-overlay" class="hidden">
+          <div id="ov-setup"></div>
+          <div id="ov-summary" class="hidden"></div>
+        </div>
+      </div>
+      <span id="g-score"></span><span id="g-acc"></span><span id="g-streak"></span><span id="g-qnum"></span>
+      <button id="g-start" type="button"></button>
+      <button id="g-again" type="button"></button>
+      <button id="g-settings" type="button"></button>
+      <button id="g-restart" type="button"></button>
+      <button id="g-sound" type="button"></button>
+      <input id="ov-count" type="range" value="10">
+      <span id="ov-count-val">10</span>
+      <input id="ov-speed" type="range" value="2">
+      <span id="ov-speed-val">2</span>
+      <input id="g-speed" type="range" value="2">
+      <p id="ov-mode-note"></p>
+    </div>
+
+    <div id="snake-game" class="snake-wrap">
+      <div class="snake-how">
+        <h3>How to play</h3>
+        <p>Use arrow keys or WASD to guide the snake. Eat the correct factorization for the trinomial shown above the board. There is no time limit. You have 3 lives, clear 5 levels to win, and avoid walls or your own body.</p>
+        <p><b>Normal:</b> eat the correct factor pair in one step. <b>Advanced:</b> first eat the common factor, then eat both correct linear factors.</p>
+      </div>
+      <div class="snake-hud">
+        <div class="snake-stat">Level <b id="sn-level">1</b>/5</div>
+        <div class="snake-stat">Lives <b id="sn-lives">3</b></div>
+        <div class="snake-stat">Score <b id="sn-score">0</b></div>
+        <div class="snake-modes" aria-label="Snake mode">
+          <button class="snake-mode active" data-snake-mode="normal" type="button">Normal</button>
+          <button class="snake-mode" data-snake-mode="advanced" type="button">Advanced</button>
+        </div>
+        <span id="sn-msg" class="snake-msg"></span>
+        <button id="sn-start" class="snake-btn" type="button">Start Snake</button>
+      </div>
+      <div id="sn-prompt" class="snake-prompt"></div>
+      <div class="snake-play">
+        <div class="snake-board-wrap">
+          <canvas id="snake-board" width="520" height="520"></canvas>
+        </div>
+        <div class="snake-pad" aria-label="Snake direction controls">
+          <button class="up" data-snake-dir="up" type="button" aria-label="up">&#8593;</button>
+          <button class="left" data-snake-dir="left" type="button" aria-label="left">&#8592;</button>
+          <button class="right" data-snake-dir="right" type="button" aria-label="right">&#8594;</button>
+          <button class="down" data-snake-dir="down" type="button" aria-label="down">&#8595;</button>
+        </div>
+      </div>
+    </div>
+    <p class="hint">Controls: Arrow keys / WASD · Mobile: use the direction pad · Click <b>Start Snake</b> to begin</p>
+  </main>
+  <script>
+    window.addEventListener("DOMContentLoaded", function () {
+      function boot() {
+        if (!window.FactGame) { setTimeout(boot, 30); return; }
+        window.FactGame.mount();
+        window.FactGame.show();
+      }
+      boot();
+    });
+  </script>
+</body>
+</html>
