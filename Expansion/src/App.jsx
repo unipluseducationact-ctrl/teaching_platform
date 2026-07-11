@@ -679,14 +679,14 @@ function App() {
                 </span>
               </button>
             </nav>
-            <a className="back-platform" href="../../index.html">
+            <a className="back-platform" href="../../levels/pre-s2.html">
               <ArrowLeft size={16} />
               Back to platform
             </a>
           </>
         )}
         {!sidebarOpen && (
-          <a className="back-platform collapsed" href="../../index.html" aria-label="Back to platform" title="Back to platform">
+          <a className="back-platform collapsed" href="../../levels/pre-s2.html" aria-label="Back to platform" title="Back to platform">
             <ArrowLeft size={18} />
           </a>
         )}
