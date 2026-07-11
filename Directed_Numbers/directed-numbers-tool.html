@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>Directed Numbers — Number Line</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    background: #f7f8fa;
+    color: #222;
+    max-width: 1200px;
+    margin: 0 auto;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    padding: 6px 10px max(6px, env(safe-area-inset-bottom));
+    padding-left: max(10px, env(safe-area-inset-left));
+    padding-right: max(10px, env(safe-area-inset-right));
+    gap: 6px;
+  }
+
+  .top {
+    flex: 0 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 12px;
+    background: #fff;
+    border: 1px solid #e8e8e8;
+    border-radius: 12px;
+    padding: 6px 10px;
+  }
+  .top h1 {
+    font-size: clamp(0.95rem, 1.8vw, 1.15rem);
+    font-weight: 700;
+    line-height: 1.1;
+    white-space: nowrap;
+  }
+  .top-right {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    justify-content: flex-end;
+    flex: 1 1 auto;
+  }
+
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    align-items: center;
+    justify-content: center;
+  }
+  .label {
+    font-size: 0.78rem;
+    color: #666;
+    margin-right: 2px;
+    white-space: nowrap;
+    font-weight: 600;
+  }
+
+  .chip {
+    border: 1.5px solid #d0d0d0;
+    background: #fff;
+    color: #222;
+    padding: 5px 9px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    line-height: 1.1;
+    min-height: 34px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .chip:hover { border-color: #888; }
+  .chip.active { border-color: #1a6fb5; background: #e8f3fb; color: #1a6fb5; font-weight: 700; }
+  .chip.lock-on { border-color: #c0392b; background: #fdecea; color: #c0392b; font-weight: 700; }
+
+  .chars { gap: 8px; }
+  .char-btn {
+    width: 48px; height: 48px;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    background: #fff;
+    padding: 2px;
+    cursor: pointer;
+    overflow: hidden;
+    touch-action: manipulation;
+  }
+  .char-btn img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    display: block;
+    pointer-events: none;
+  }
+  .char-btn.active { border-color: #1a6fb5; box-shadow: 0 0 0 2px #cfe6f7; }
+
+  #quiz {
+    flex: 0 0 auto;
+    background: linear-gradient(180deg, #fffaf0, #fff4d6);
+    border: 2px solid #f0c14b;
+    border-radius: 12px;
+    padding: 8px 10px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px 10px;
+  }
+  .quiz-tabs {
+    display: flex;
+    gap: 3px;
+    background: #fff;
+    border-radius: 9px;
+    padding: 3px;
+    border: 1px solid #f0d78a;
+    align-items: center;
+    height: 42px;
+  }
+  .quiz-tabs .chip {
+    min-height: 34px;
+    height: 34px;
+    padding: 0 12px;
+    font-size: 0.82rem;
+    border: none;
+    border-radius: 7px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .quiz-tabs .chip.active { background: #1a6fb5; color: #fff; }
+
+  .quiz-fields {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 6px 8px;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 3px;
+  }
+  .field label {
+    font-size: 0.68rem;
+    color: #666;
+    font-weight: 700;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .field label .mode-tag {
+    display: inline-block;
+    margin-left: 2px;
+    padding: 1px 6px;
+    border-radius: 5px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: none;
+    letter-spacing: 0;
+    vertical-align: middle;
+  }
+  .field label .mode-tag.is-value { background: #1a6fb5; color: #fff; }
+  .field label .mode-tag.is-steps { background: #e67e22; color: #fff; }
+  .field input {
+    width: 4.8em;
+    min-height: 42px;
+    border: 1.5px solid #d5d5d5;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 1.18rem;
+    font-weight: 700;
+    padding: 4px 6px;
+    font-family: inherit;
+    background: #fff;
+  }
+  .field input:focus {
+    outline: none;
+    border-color: #1a6fb5;
+    box-shadow: 0 0 0 2px #cfe6f7;
+  }
+  .eq-sign {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #333;
+    line-height: 42px;
+  }
+
+  #btn-check {
+    background: #1a6fb5;
+    color: #fff;
+    border-color: #1a6fb5;
+    font-weight: 700;
+    min-width: 72px;
+    min-height: 42px;
+    height: 42px;
+  }
+  #btn-lock {
+    min-height: 42px;
+    height: 42px;
+  }
+
+  #quiz-result {
+    font-weight: 800;
+    font-size: 0.95rem;
+    min-width: 5.5em;
+    text-align: center;
+    line-height: 42px;
+  }
+  #quiz-result.ok { color: #1a7a3a; }
+  #quiz-result.bad { color: #c0392b; }
+
+  #stage-wrap {
+    width: 100%;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    background: #fff;
+    overflow: hidden;
+    flex: 1 1 auto;
+    min-height: 180px;
+    display: flex;
+  }
+  #stage {
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+    display: block;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .bottom {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .pos-readout {
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .pos-readout span { color: #1a6fb5; }
+
+  @media (min-width: 768px) {
+    body { padding: 8px 14px max(8px, env(safe-area-inset-bottom)); gap: 8px; }
+    .char-btn { width: 54px; height: 54px; }
+    .field input { width: 5.2em; min-height: 46px; font-size: 1.25rem; }
+    #stage-wrap { min-height: 240px; }
+  }
+
+  @media (orientation: landscape) and (max-height: 820px) {
+    .char-btn { width: 40px; height: 40px; }
+    .field input { min-height: 36px; font-size: 1.05rem; width: 4.4em; }
+    .top { padding: 4px 8px; }
+    #quiz { padding: 5px 8px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <h1>Directed Numbers</h1>
+  <div class="top-right">
+    <div class="row chars" id="char-pick" aria-label="Choose character"></div>
+    <div class="row">
+      <span class="label">Scale interval</span>
+      <div id="step-pick" class="row"></div>
+    </div>
+  </div>
+</div>
+
+<div id="quiz">
+  <div class="quiz-tabs" role="tablist">
+    <button type="button" class="chip active" id="tab-value" data-mode="value">Value</button>
+    <button type="button" class="chip" id="tab-steps" data-mode="steps">Steps</button>
+  </div>
+  <button type="button" class="chip" id="btn-lock">Lock</button>
+  <div class="quiz-fields">
+    <div class="field">
+      <label for="inp-begin">Beginning</label>
+      <input id="inp-begin" type="text" inputmode="text" autocomplete="off" placeholder="0">
+    </div>
+    <div class="field">
+      <label for="inp-change" id="lbl-change">Change</label>
+      <input id="inp-change" type="text" inputmode="text" autocomplete="off" placeholder="+3">
+    </div>
+    <span class="eq-sign">=</span>
+    <div class="field">
+      <label for="inp-final">Final</label>
+      <input id="inp-final" type="text" inputmode="text" autocomplete="off" placeholder="?">
+    </div>
+    <button type="button" class="chip" id="btn-check">Check</button>
+    <div id="quiz-result" aria-live="polite"></div>
+  </div>
+</div>
+
+<div id="stage-wrap">
+  <svg id="stage" viewBox="0 0 900 300" role="img" aria-label="Number line" preserveAspectRatio="none"></svg>
+</div>
+
+<div class="bottom">
+  <div class="pos-readout">Position: <span id="pos-val">0</span></div>
+  <button class="chip" type="button" id="btn-reset">Reset</button>
+</div>
+
+<script>
+const STEPS = [
+  { id: '1',   value: 1,   label: '1' },
+  { id: '2',   value: 2,   label: '2' },
+  { id: '3',   value: 3,   label: '3' },
+  { id: '5',   value: 5,   label: '5' },
+  { id: '1/2', value: 1/2, label: '1/2' },
+  { id: '1/3', value: 1/3, label: '1/3' },
+  { id: '1/5', value: 1/5, label: '1/5' },
+];
+
+const CHARS = [
+  { id: 'rocket',  src: 'assets/character-rocket-cat.png', alt: 'Rocket Cat' },
+  { id: 'doggie',  src: 'assets/character-doggie.png',     alt: 'Doggie' },
+  { id: 'raccoon', src: 'assets/character-raccoon.png',    alt: 'Raccoon' },
+];
+
+const W = 900;
+const PAD = 52;
+let H = 300;
+let LINE_Y = 200;
+let CHAR_W = 72;
+let CHAR_H = 90;
+
+const state = {
+  step: 1,
+  stepId: '1',
+  charId: 'rocket',
+  pos: 0,
+  dragging: false,
+  animating: false,
+  locked: false,
+  lockedPos: null,
+  changeMode: 'value',
+  tickCount: 10,
+};
+
+const svg = document.getElementById('stage');
+const stageWrap = document.getElementById('stage-wrap');
+const posEl = document.getElementById('pos-val');
+const inpBegin = document.getElementById('inp-begin');
+const inpChange = document.getElementById('inp-change');
+const inpFinal = document.getElementById('inp-final');
+const lblChange = document.getElementById('lbl-change');
+const quizResult = document.getElementById('quiz-result');
+const btnLock = document.getElementById('btn-lock');
+
+function nearly(a, b, eps = 1e-9) { return Math.abs(a - b) < eps; }
+
+function gcd(a, b) {
+  a = Math.abs(Math.round(a)); b = Math.abs(Math.round(b));
+  while (b) { const t = b; b = a % b; a = t; }
+  return a || 1;
+}
+
+function formatVal(v) {
+  const p = toParts(v);
+  if (p.kind === 'int') return p.sign + p.abs;
+  return p.sign + p.num + '/' + p.den;
+}
+
+/** Break a value into integer or reduced fraction parts for display. */
+function toParts(v) {
+  if (!isFinite(v)) return { kind: 'int', sign: '', abs: '—' };
+  if (nearly(v, 0)) return { kind: 'int', sign: '', abs: '0' };
+
+  const dens = [];
+  if (state.step > 0 && state.step < 1) dens.push(Math.round(1 / state.step));
+  dens.push(1, 2, 3, 4, 5, 6, 8, 10, 12, 15);
+
+  for (const den of dens) {
+    const num = Math.round(v * den);
+    if (!nearly(num / den, v, 1e-6)) continue;
+    const sign = num < 0 ? '−' : '';
+    const a = Math.abs(num);
+    if (a % den === 0) return { kind: 'int', sign, abs: String(a / den) };
+    const g = gcd(a, den);
+    return { kind: 'frac', sign, num: a / g, den: den / g };
+  }
+  const r = Math.round(v * 1e6) / 1e6;
+  return { kind: 'int', sign: r < 0 ? '−' : '', abs: String(Math.abs(r)) };
+}
+
+/**
+ * LaTeX-style vertical fraction (or plain integer) as SVG.
+ * `y` is the top baseline of the numerator (or the single integer).
+ */
+function svgNumberLabel(x, y, v, fill, fontSize) {
+  const p = toParts(v);
+  const fam = 'Segoe UI,sans-serif';
+  if (p.kind === 'int') {
+    return `<text x="${x}" y="${y}" fill="${fill}" font-size="${fontSize}" text-anchor="middle"
+              font-weight="700" font-family="${fam}">${p.sign}${p.abs}</text>`;
+  }
+
+  const fs = Math.max(10, fontSize * 0.82);
+  const barGap = Math.max(2, fs * 0.12);
+  const barW = Math.max(fs * 1.05, Math.max(String(p.num).length, String(p.den).length) * fs * 0.62);
+  const midY = y + barGap;
+  const denY = midY + fs * 0.92;
+  let s = '';
+  if (p.sign) {
+    s += `<text x="${x - barW / 2 - fs * 0.45}" y="${midY + fs * 0.25}" fill="${fill}" font-size="${fs}"
+            text-anchor="middle" font-weight="700" font-family="${fam}">${p.sign}</text>`;
+  }
+  s += `<text x="${x}" y="${y}" fill="${fill}" font-size="${fs}" text-anchor="middle"
+          font-weight="700" font-family="${fam}">${p.num}</text>`;
+  s += `<line x1="${x - barW / 2}" y1="${midY}" x2="${x + barW / 2}" y2="${midY}"
+          stroke="${fill}" stroke-width="${Math.max(1.4, fs * 0.12)}" stroke-linecap="round"/>`;
+  s += `<text x="${x}" y="${denY}" fill="${fill}" font-size="${fs}" text-anchor="middle"
+          font-weight="700" font-family="${fam}">${p.den}</text>`;
+  return s;
+}
+
+function parseInput(raw) {
+  if (raw == null) return NaN;
+  let s = String(raw).trim().replace(/−/g, '-').replace(/\s+/g, '').replace(/^\+/, '');
+  if (!s) return NaN;
+  const frac = s.match(/^(-)?(\d+)\/(\d+)$/);
+  if (frac) {
+    const den = parseInt(frac[3], 10);
+    if (!den) return NaN;
+    return (frac[1] ? -1 : 1) * parseInt(frac[2], 10) / den;
+  }
+  const n = Number(s);
+  return Number.isFinite(n) ? n : NaN;
+}
+
+function range() {
+  const half = state.tickCount * state.step;
+  return { min: -half, max: half };
+}
+
+function x2px(v) {
+  const { min, max } = range();
+  return PAD + (v - min) / (max - min) * (W - 2 * PAD);
+}
+
+function px2x(px) {
+  const { min, max } = range();
+  return min + (px - PAD) / (W - 2 * PAD) * (max - min);
+}
+
+function snap(v) {
+  return Math.round(v / state.step) * state.step;
+}
+
+function clamp(v) {
+  const { min, max } = range();
+  return Math.max(min, Math.min(max, v));
+}
+
+function isOnTick(v) {
+  return nearly(v, snap(v), state.step * 0.12);
+}
+
+/** Fit SVG viewBox to stage size so the number line fills the panel. */
+function syncViewport() {
+  const rect = stageWrap.getBoundingClientRect();
+  if (rect.width < 40 || rect.height < 40) return;
+  H = Math.max(220, Math.round(W * rect.height / rect.width));
+  // Leave more room under the axis when labels may be stacked fractions
+  LINE_Y = Math.round(H * (state.step < 1 ? 0.58 : 0.66));
+  CHAR_H = Math.round(Math.min(H * 0.36, 110));
+  CHAR_W = Math.round(CHAR_H * 0.8);
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+}
+
+function clearQuizResult() {
+  quizResult.textContent = '';
+  quizResult.className = '';
+}
+
+function updateChangeLabel() {
+  const mode = state.changeMode === 'steps' ? 'steps' : 'value';
+  const tagClass = mode === 'steps' ? 'is-steps' : 'is-value';
+  lblChange.innerHTML = `Change <span class="mode-tag ${tagClass}">(${mode})</span>`;
+  inpChange.placeholder = mode === 'steps' ? 'e.g. 3' : 'e.g. +3';
+  document.getElementById('tab-value').classList.toggle('active', state.changeMode === 'value');
+  document.getElementById('tab-steps').classList.toggle('active', state.changeMode === 'steps');
+}
+
+function updateLockBtn() {
+  btnLock.textContent = state.locked ? 'Unlock' : 'Lock';
+  btnLock.classList.toggle('lock-on', state.locked);
+}
+
+function shouldShowPosLabel() {
+  if (state.animating) return false;
+  if (state.dragging) return isOnTick(state.pos);
+  return true;
+}
+
+function draw(extraY = 0) {
+  syncViewport();
+  const s = state.step;
+  const tickH = Math.max(10, Math.round(H * 0.045));
+  const labelSize = s < 1 ? Math.max(12, Math.round(H * 0.045)) : Math.max(14, Math.round(H * 0.05));
+  let html = '';
+
+  // soft ground band under the line
+  html += `<rect x="0" y="${LINE_Y + 8}" width="${W}" height="${H - LINE_Y - 8}" fill="#f4f7fb"/>`;
+
+  html += `<line x1="${PAD}" y1="${LINE_Y}" x2="${W - PAD}" y2="${LINE_Y}" stroke="#333" stroke-width="3"/>`;
+  html += `<polygon points="${W - PAD + 16},${LINE_Y} ${W - PAD - 2},${LINE_Y - 8} ${W - PAD - 2},${LINE_Y + 8}" fill="#333"/>`;
+  html += `<polygon points="${PAD - 16},${LINE_Y} ${PAD + 2},${LINE_Y - 8} ${PAD + 2},${LINE_Y + 8}" fill="#333"/>`;
+
+  for (let k = -state.tickCount; k <= state.tickCount; k++) {
+    const v = k * s;
+    const x = x2px(v);
+    const isZero = k === 0;
+    const th = isZero ? tickH + 6 : tickH;
+    const fill = v < 0 ? '#c0392b' : v > 0 ? '#1a7a3a' : '#1a6fb5';
+    html += `<line x1="${x}" y1="${LINE_Y - th}" x2="${x}" y2="${LINE_Y + th}"
+              stroke="#333" stroke-width="${isZero ? 3 : 1.8}"/>`;
+    const labelY = LINE_Y + th + labelSize * 0.9;
+    html += svgNumberLabel(x, labelY, v, fill, labelSize);
+  }
+
+  if (state.locked && state.lockedPos != null) {
+    const lx = x2px(state.lockedPos);
+    html += `<line x1="${lx}" y1="${LINE_Y - CHAR_H * 0.55}" x2="${lx}" y2="${LINE_Y - 10}"
+              stroke="#c0392b" stroke-width="2" stroke-dasharray="4 3"/>`;
+    html += `<circle cx="${lx}" cy="${LINE_Y}" r="7" fill="none" stroke="#c0392b" stroke-width="2.5"/>`;
+    html += `<text x="${lx}" y="${LINE_Y - CHAR_H * 0.55 - 6}" fill="#c0392b" font-size="${Math.max(12, labelSize - 2)}"
+              text-anchor="middle" font-weight="700">start</text>`;
+  }
+
+  const cx = x2px(state.pos);
+  const cy = LINE_Y - 14 - CHAR_H / 2 + extraY;
+
+  if (shouldShowPosLabel()) {
+    const labelVal = state.dragging ? snap(state.pos) : state.pos;
+    const posFs = Math.max(15, Math.round(H * 0.055));
+    const posY = cy - CHAR_H / 2 - (toParts(labelVal).kind === 'frac' ? posFs * 1.6 : posFs * 0.35);
+    html += svgNumberLabel(cx, posY, labelVal, '#1a6fb5', posFs);
+  }
+
+  const char = CHARS.find(c => c.id === state.charId);
+  html += `<image id="marker" href="${char.src}" x="${cx - CHAR_W / 2}" y="${cy - CHAR_H / 2}"
+            width="${CHAR_W}" height="${CHAR_H}"
+            style="cursor:${state.locked ? 'not-allowed' : 'grab'}"
+            preserveAspectRatio="xMidYMid meet"/>`;
+
+  svg.innerHTML = html;
+
+  if (shouldShowPosLabel()) {
+    posEl.textContent = formatVal(state.dragging ? snap(state.pos) : state.pos);
+  } else if (state.dragging || state.animating) {
+    posEl.textContent = '—';
+  }
+}
+
+function buildUI() {
+  const charPick = document.getElementById('char-pick');
+  charPick.innerHTML = '';
+  CHARS.forEach(c => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'char-btn' + (c.id === state.charId ? ' active' : '');
+    b.title = c.alt;
+    b.setAttribute('aria-label', c.alt);
+    b.innerHTML = `<img src="${c.src}" alt="${c.alt}">`;
+    b.addEventListener('click', () => {
+      if (state.animating) return;
+      state.charId = c.id;
+      buildUI();
+      draw();
+    });
+    charPick.appendChild(b);
+  });
+
+  const stepPick = document.getElementById('step-pick');
+  stepPick.innerHTML = '';
+  STEPS.forEach(st => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip' + (st.id === state.stepId ? ' active' : '');
+    b.textContent = st.label;
+    b.addEventListener('click', () => {
+      if (state.animating) return;
+      state.stepId = st.id;
+      state.step = st.value;
+      state.pos = clamp(snap(state.pos));
+      if (state.locked) {
+        state.lockedPos = clamp(snap(state.lockedPos));
+        inpBegin.value = formatVal(state.lockedPos);
+      }
+      clearQuizResult();
+      buildUI();
+      draw();
+    });
+    stepPick.appendChild(b);
+  });
+
+  updateChangeLabel();
+  updateLockBtn();
+}
+
+function animateStepByStep(from, to) {
+  state.animating = true;
+  buildUI();
+
+  const s = state.step;
+  const delta = to - from;
+  const hops = Math.round(delta / s);
+  const onGrid = nearly(hops * s, delta, s * 0.01 + 1e-9);
+
+  if (!onGrid || hops === 0) {
+    animateHop(from, to, () => {
+      state.pos = to;
+      state.animating = false;
+      draw();
+    });
+    return;
+  }
+
+  const dir = Math.sign(hops);
+  let i = 0;
+  const total = Math.abs(hops);
+  const fromK = Math.round(from / s);
+
+  const next = () => {
+    if (i >= total) {
+      state.pos = to;
+      state.animating = false;
+      draw();
+      return;
+    }
+    const a = (fromK + i * dir) * s;
+    const b = (fromK + (i + 1) * dir) * s;
+    i++;
+    animateHop(a, b, next);
+  };
+  next();
+}
+
+function animateHop(from, to, done) {
+  const frames = 18;
+  let f = 0;
+  const arcH = Math.min(36, H * 0.12);
+  const timer = setInterval(() => {
+    f++;
+    const t = f / frames;
+    const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+    state.pos = from + (to - from) * ease;
+    draw(-Math.sin(t * Math.PI) * arcH);
+    if (f >= frames) {
+      clearInterval(timer);
+      state.pos = to;
+      draw();
+      posEl.textContent = formatVal(to);
+      setTimeout(done, 80);
+    }
+  }, 18);
+}
+
+function expectedFinal(begin, change) {
+  if (state.changeMode === 'steps') return begin + change * state.step;
+  return begin + change;
+}
+
+function checkAnswer() {
+  clearQuizResult();
+  const begin = parseInput(inpBegin.value);
+  const change = parseInput(inpChange.value);
+  const final = parseInput(inpFinal.value);
+
+  if (!Number.isFinite(begin) || !Number.isFinite(change) || !Number.isFinite(final)) {
+    quizResult.textContent = 'Enter Beginning, Change and Final';
+    quizResult.className = 'bad';
+    return;
+  }
+
+  const expect = expectedFinal(begin, change);
+  const tol = state.step * 0.01 + 1e-9;
+
+  if (nearly(final, expect, tol)) {
+    quizResult.textContent = 'Correct!';
+    quizResult.className = 'ok';
+    const { min, max } = range();
+    if (expect >= min - 1e-9 && expect <= max + 1e-9 && !state.animating) {
+      animateStepByStep(state.pos, snap(expect));
+    }
+  } else {
+    quizResult.textContent = 'Wrong — try again';
+    quizResult.className = 'bad';
+  }
+}
+
+btnLock.addEventListener('click', () => {
+  if (state.animating) return;
+  if (state.locked) {
+    state.locked = false;
+    state.lockedPos = null;
+  } else {
+    state.pos = clamp(snap(state.pos));
+    state.locked = true;
+    state.lockedPos = state.pos;
+    inpBegin.value = formatVal(state.lockedPos);
+    clearQuizResult();
+  }
+  updateLockBtn();
+  draw();
+});
+
+document.getElementById('tab-value').addEventListener('click', () => {
+  state.changeMode = 'value';
+  updateChangeLabel();
+  clearQuizResult();
+});
+document.getElementById('tab-steps').addEventListener('click', () => {
+  state.changeMode = 'steps';
+  updateChangeLabel();
+  clearQuizResult();
+});
+
+document.getElementById('btn-check').addEventListener('click', checkAnswer);
+[inpBegin, inpChange, inpFinal].forEach(el => {
+  el.addEventListener('keydown', e => { if (e.key === 'Enter') checkAnswer(); });
+  el.addEventListener('input', clearQuizResult);
+});
+
+function clientToSvgX(evt) {
+  const pt = evt.touches ? evt.touches[0] : evt;
+  const rect = svg.getBoundingClientRect();
+  return (pt.clientX - rect.left) / rect.width * W;
+}
+
+function onPointerDown(e) {
+  if (state.animating || state.locked) return;
+  const mx = x2px(state.pos);
+  const sx = clientToSvgX(e);
+  const nearChar = Math.abs(sx - mx) < CHAR_W * 1.4;
+  if ((e.target && e.target.id === 'marker') || nearChar) {
+    state.dragging = true;
+    try { svg.setPointerCapture(e.pointerId); } catch (_) {}
+    moveTo(e);
+    e.preventDefault();
+  }
+}
+
+function onPointerMove(e) {
+  if (!state.dragging) return;
+  moveTo(e);
+  e.preventDefault();
+}
+
+function onPointerUp() {
+  if (!state.dragging) return;
+  state.dragging = false;
+  state.pos = clamp(snap(state.pos));
+  draw();
+}
+
+function moveTo(e) {
+  state.pos = clamp(px2x(clientToSvgX(e)));
+  draw();
+}
+
+svg.addEventListener('pointerdown', onPointerDown);
+window.addEventListener('pointermove', onPointerMove);
+window.addEventListener('pointerup', onPointerUp);
+window.addEventListener('pointercancel', onPointerUp);
+
+document.getElementById('btn-reset').addEventListener('click', () => {
+  if (state.animating) return;
+  state.pos = 0;
+  state.locked = false;
+  state.lockedPos = null;
+  inpBegin.value = '';
+  inpChange.value = '';
+  inpFinal.value = '';
+  clearQuizResult();
+  updateLockBtn();
+  buildUI();
+  draw();
+});
+
+function redrawFit() {
+  syncViewport();
+  draw();
+}
+
+updateChangeLabel();
+updateLockBtn();
+buildUI();
+redrawFit();
+
+if (window.ResizeObserver) {
+  new ResizeObserver(redrawFit).observe(stageWrap);
+} else {
+  window.addEventListener('resize', redrawFit);
+}
+</script>
+</body>
+</html>
