@@ -241,8 +241,8 @@
       function paren(t) { return t.charAt(0) === "-" ? "(" + t + ")" : t; }
       function colorClass(v) {
         if (v.indexOf("(") !== -1) return "grp";
-        if (v.indexOf("a^2") !== -1) return "a";
-        if (v.indexOf("b^2") !== -1) return "b";
+        if (v === "a" || v.indexOf("a^2") !== -1) return "a";
+        if (v === "b" || v === "-b" || v.indexOf("b^2") !== -1) return "b";
         return "ab";
       }
 
@@ -272,7 +272,7 @@
             lhs: "(a+b)^2",
             steps: [
               { label: "Write as a product", tokens: [S("p1", "(a+b)"), S("p2", "(a+b)")] },
-              { label: "Expand each bracket", tokens: [S("g1", "a(a+b)"), F("+"), S("g2", "b(a+b)")] },
+              { label: "Expand each bracket", tokens: [S("g1a", "a"), S("g1b", "(a+b)"), F("+"), S("g2a", "b"), S("g2b", "(a+b)")] },
               { label: AREA, tokens: A },
               { label: "Combine like terms", tokens: [F("a^2"), F("+"), S("m", "2ab"), F("+"), F("b^2")] }
             ]
@@ -281,7 +281,7 @@
             lhs: "(a-b)^2",
             steps: [
               { label: "Write as a product", tokens: [S("p1", "(a-b)"), S("p2", "(a-b)")] },
-              { label: "Expand each bracket", tokens: [S("g1", "a(a-b)"), F("-"), S("g2", "b(a-b)")] },
+              { label: "Expand each bracket", tokens: [S("g1a", "a"), S("g1b", "(a-b)"), F("-"), S("g2a", "b"), S("g2b", "(a-b)")] },
               { label: AREA, tokens: A },
               { label: "Combine like terms", tokens: [F("a^2"), F("-"), S("m", "2ab"), F("+"), F("b^2")] }
             ]
@@ -289,7 +289,7 @@
           return {
             lhs: "(a+b)(a-b)",
             steps: [
-              { label: "Expand each bracket", tokens: [S("g1", "a(a-b)"), F("+"), S("g2", "b(a-b)")] },
+              { label: "Expand each bracket", tokens: [S("g1a", "a"), S("g1b", "(a-b)"), F("+"), S("g2a", "b"), S("g2b", "(a-b)")] },
               { label: AREA, tokens: A }
             ],
             answer: "a^2-b^2",
@@ -301,7 +301,7 @@
           lhs: "a^2+2ab+b^2",
           steps: [
             { label: "Split into four areas (row × column)", tokens: A },
-            { label: "Group in pairs", tokens: [S("g1", "a(a+b)"), F("+"), S("g2", "b(a+b)")] },
+            { label: "Group in pairs", tokens: [S("g1a", "a"), S("g1b", "(a+b)"), F("+"), S("g2a", "b"), S("g2b", "(a+b)")] },
             { label: "Take out the common factor", tokens: [S("f1", "(a+b)"), S("f2", "(a+b)")] }
           ],
           answer: "(a+b)^2"
@@ -310,7 +310,7 @@
           lhs: "a^2-2ab+b^2",
           steps: [
             { label: "Split into four areas (row × column)", tokens: A },
-            { label: "Group in pairs", tokens: [S("g1", "a(a-b)"), F("-"), S("g2", "b(a-b)")] },
+            { label: "Group in pairs", tokens: [S("g1a", "a"), S("g1b", "(a-b)"), F("-"), S("g2a", "b"), S("g2b", "(a-b)")] },
             { label: "Take out the common factor", tokens: [S("f1", "(a-b)"), S("f2", "(a-b)")] }
           ],
           answer: "(a-b)^2"
@@ -319,7 +319,7 @@
           lhs: "a^2-b^2",
           steps: [
             { label: "Split into four areas (row × column)", tokens: A },
-            { label: "Group in pairs", tokens: [S("g1", "a(a+b)"), F("-"), S("g2", "b(a+b)")] },
+            { label: "Group in pairs", tokens: [S("g1a", "a"), S("g1b", "(a+b)"), F("-"), S("g2a", "b"), S("g2b", "(a+b)")] },
             { label: "Take out the common factor", tokens: [S("f1", "(a+b)"), S("f2", "(a-b)")] }
           ]
         };
