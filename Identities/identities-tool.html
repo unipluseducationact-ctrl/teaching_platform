@@ -87,13 +87,20 @@
     .verdict.bad { color: var(--bad); }
     .verdict.neutral { color: var(--dim); font-weight: 600; font-size: 14px; }
 
-    .reveal { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 14px; display: none; }
-    .reveal.show { display: block; }
-    .reveal .eq-line { font-size: 22px; text-align: center; margin: 8px 0; color: var(--ink); line-height: 1.5; overflow-x: auto; }
-    .reveal .eq-line .katex { font-size: 1.12em; }
-    .reveal .eq-line .katex-display { margin: 6px 0; }
-    .reveal .eq-label { text-align: center; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--dim); font-weight: 700; margin-bottom: 2px; }
-    .reveal-nav { display: flex; justify-content: center; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+    .reveal {
+      margin: 6px 0 22px; background: #fff; border: 1px solid var(--line);
+      border-left: 5px solid var(--ab); border-radius: 12px; padding: 16px 20px 18px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.03);
+    }
+    .reveal .eq-label { text-align: center; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--ab); font-weight: 700; margin-bottom: 14px; }
+    .steps-grid { display: grid; grid-template-columns: auto auto; column-gap: 10px; row-gap: 8px; justify-content: center; align-items: baseline; overflow-x: auto; }
+    .step-lhs { text-align: right; font-size: 22px; color: var(--ink); }
+    .step-rhs { text-align: left; font-size: 22px; color: var(--ink); padding: 3px 10px; border-radius: 8px; white-space: nowrap; }
+    .step-lhs .katex, .step-rhs .katex { font-size: 1.04em; }
+    .step-rhs.is-new { background: rgba(129,199,132,.24); box-shadow: 0 0 0 1px rgba(46,125,50,.25) inset; animation: stepIn .25s ease; }
+    @keyframes stepIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: none; } }
+    .steps-hint { text-align: center; color: var(--dim); font-size: 14px; padding: 6px 0; }
+    .reveal-nav { display: flex; justify-content: center; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
 
     .btn {
       background: var(--panel); border: 1px solid var(--line); color: var(--ink); font: inherit;
@@ -158,6 +165,16 @@
           <div class="lead" id="prompt-lead"></div>
           <div class="expr" id="prompt-expr"></div>
         </div>
+
+        <div class="reveal" id="reveal">
+          <div class="eq-label" id="reveal-label"></div>
+          <div class="steps-grid" id="reveal-lines"></div>
+          <div class="steps-hint" id="reveal-hint"></div>
+          <div class="reveal-nav">
+            <button class="btn primary" id="combine-btn" type="button"></button>
+          </div>
+        </div>
+
         <p class="note" id="board-note"></p>
 
         <div class="area-wrap">
@@ -165,14 +182,6 @@
         </div>
 
         <div class="verdict neutral" id="verdict"></div>
-
-        <div class="reveal" id="reveal">
-          <div class="eq-label" id="reveal-label"></div>
-          <div class="eq-line" id="reveal-line"></div>
-          <div class="reveal-nav">
-            <button class="btn primary" id="combine-btn" type="button"></button>
-          </div>
-        </div>
 
         <div class="board-nav">
           <button class="btn" id="reset-btn" type="button">Clear board</button>
@@ -234,11 +243,6 @@
         clear(el);
         try { katex.render(tex, el, { throwOnError: false, displayMode: !!display }); }
         catch (e) { el.textContent = tex; }
-      }
-      function alignedTex(lhs, rhsLines) {
-        var s = "\\begin{aligned}" + lhs + " &= " + rhsLines[0];
-        for (var i = 1; i < rhsLines.length; i++) { s += " \\\\ &= " + rhsLines[i]; }
-        return s + "\\end{aligned}";
       }
       function colorClass(v) {
         if (v.indexOf("a^2") !== -1) return "a";
@@ -469,21 +473,34 @@
       }
 
       function renderReveal() {
-        var reveal = $("reveal");
         var label = $("reveal-label");
-        var line = $("reveal-line");
+        var grid = $("reveal-lines");
+        var hint = $("reveal-hint");
         var btn = $("combine-btn");
+        label.textContent = state.mode === "expand" ? "Expansion" : "Factorization";
 
         if (state.revealStage < 1) {
-          reveal.classList.remove("show");
+          clear(grid);
+          hint.style.display = "";
+          hint.textContent = "Fill the area model below correctly to build the steps.";
+          btn.style.display = "none";
           return;
         }
-        reveal.classList.add("show");
 
-        label.textContent = state.mode === "expand" ? "Expansion" : "Factorization";
+        hint.style.display = "none";
         var steps = stepsFor(state.id, state.mode);
         var shown = Math.min(state.revealStage, steps.rhs.length);
-        kx(line, alignedTex(steps.lhs, steps.rhs.slice(0, shown)), true);
+        clear(grid);
+        for (var i = 0; i < shown; i++) {
+          var lc = document.createElement("div");
+          lc.className = "step-lhs";
+          if (i === 0) kx(lc, steps.lhs);
+          var rc = document.createElement("div");
+          rc.className = "step-rhs" + (i === shown - 1 ? " is-new" : "");
+          kx(rc, "= " + steps.rhs[i]);
+          grid.appendChild(lc);
+          grid.appendChild(rc);
+        }
         btn.textContent = "Next step →";
         btn.style.display = shown >= steps.rhs.length ? "none" : "";
       }
