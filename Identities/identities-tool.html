@@ -95,8 +95,9 @@
 
     .reveal { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 14px; display: none; }
     .reveal.show { display: block; }
-    .reveal .eq-line { font-size: 22px; text-align: center; margin: 8px 0; color: var(--ink); line-height: 1.5; }
+    .reveal .eq-line { font-size: 22px; text-align: center; margin: 8px 0; color: var(--ink); line-height: 1.5; overflow-x: auto; }
     .reveal .eq-line .katex { font-size: 1.12em; }
+    .reveal .eq-line .katex-display { margin: 6px 0; }
     .reveal .eq-label { text-align: center; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--dim); font-weight: 700; margin-bottom: 2px; }
     .reveal-nav { display: flex; justify-content: center; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
 
@@ -245,10 +246,15 @@
 
       function $(id) { return document.getElementById(id); }
       function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
-      function kx(el, tex) {
+      function kx(el, tex, display) {
         clear(el);
-        try { katex.render(tex, el, { throwOnError: false, displayMode: false }); }
+        try { katex.render(tex, el, { throwOnError: false, displayMode: !!display }); }
         catch (e) { el.textContent = tex; }
+      }
+      function alignedTex(lhs, rhsLines) {
+        var s = "\\begin{aligned}" + lhs + " &= " + rhsLines[0];
+        for (var i = 1; i < rhsLines.length; i++) { s += " \\\\ &= " + rhsLines[i]; }
+        return s + "\\end{aligned}";
       }
       function colorClass(v) {
         if (v.indexOf("a^2") !== -1) return "a";
@@ -446,27 +452,19 @@
 
         var raw = rawSum(idn.cells);
         if (state.mode === "expand") {
-          if (state.revealStage === 1) {
-            label.textContent = "Add the four areas";
-            kx(line, idn.factored + " = " + raw);
-            btn.textContent = "Combine like terms →";
-            btn.style.display = "";
-          } else {
-            label.textContent = "Combine like terms";
-            kx(line, idn.factored + " = " + idn.expanded);
-            btn.style.display = "none";
-          }
+          label.textContent = "Expansion";
+          var rhs = [raw];
+          if (state.revealStage >= 2) rhs.push(idn.expanded);
+          kx(line, alignedTex(idn.factored, rhs), true);
+          btn.textContent = "Combine like terms →";
+          btn.style.display = state.revealStage >= 2 ? "none" : "";
         } else {
-          if (state.revealStage === 1) {
-            label.textContent = "Split into the four areas";
-            kx(line, idn.expanded + " = " + raw);
-            btn.textContent = "Read off the factors →";
-            btn.style.display = "";
-          } else {
-            label.textContent = "Factorized form";
-            kx(line, idn.expanded + " = " + idn.factored);
-            btn.style.display = "none";
-          }
+          label.textContent = "Factorization";
+          var rhsF = [raw];
+          if (state.revealStage >= 2) rhsF.push(idn.factored);
+          kx(line, alignedTex(idn.expanded, rhsF), true);
+          btn.textContent = "Read off the factors →";
+          btn.style.display = state.revealStage >= 2 ? "none" : "";
         }
       }
 
