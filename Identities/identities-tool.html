@@ -89,6 +89,9 @@
       display: flex; align-items: center; justify-content: center; position: relative;
       font-size: 20px; transition: border-color .15s, background .15s;
     }
+    .slot.sign-slot { min-width: 40px; padding: 0 6px; }
+    .slot.sign-slot .katex { color: #37474F; }
+    .slot.sign-slot .ph { color: rgba(0,0,0,.3); font-size: 20px; }
     .slot.target { border-color: var(--a); background: rgba(79,195,247,.10); }
     .slot.drag-over { border-color: var(--a); background: rgba(79,195,247,.20); }
     .slot.correct { border-style: solid; border-color: var(--ab); background: rgba(129,199,132,.16); }
@@ -130,7 +133,10 @@
     .tile-bank { background: var(--panel2); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; position: sticky; top: 16px; }
     .tile-bank h4 { margin: 0 0 4px; font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink); font-weight: 700; }
     .bank-hint { font-size: 12px; color: var(--dim); margin: 0 0 12px; line-height: 1.45; }
-    .tiles { display: flex; flex-wrap: wrap; gap: 10px; }
+    .tiles { display: flex; flex-direction: column; gap: 6px; }
+    .tiles-sub { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--dim); font-weight: 700; margin-top: 6px; }
+    .tiles-sub:first-child { margin-top: 0; }
+    .tiles-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 4px; }
     .tile {
       display: inline-flex; align-items: center; justify-content: center; min-width: 52px; height: 46px;
       padding: 0 14px; border-radius: 10px; font-weight: 700; font-size: 18px;
@@ -142,6 +148,7 @@
     .tile.b  { background: rgba(255,213,79,.28); color: var(--b); border-color: rgba(154,114,9,.4); }
     .tile.ab { background: rgba(129,199,132,.28); color: var(--ab); border-color: rgba(46,125,50,.4); }
     .tile.grp { background: #fff; color: var(--ink); border-color: rgba(0,0,0,.18); }
+    .tile.sign { min-width: 46px; background: #eef1f4; color: #37474F; border-color: rgba(0,0,0,.2); }
 
     .legend { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
     .legend-title { margin: 0 0 10px; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink); font-weight: 700; }
@@ -249,16 +256,21 @@
       // token helpers
       function F(t) { return { fix: t }; }
       function S(id, ans, cap) { return { slot: true, id: id, ans: ans, cap: cap }; }
+      function SGN(id, sign) { return { slot: true, sign: true, id: id, ans: sign }; }
+      function stripSign(v) { return v.charAt(0) === "-" ? v.slice(1) : v; }
+      function signOf(v) { return v.charAt(0) === "-" ? "-" : "+"; }
+      function valKind(v) { return (v === "+" || v === "-") ? "sign" : "term"; }
 
-      // the four-products (area model) line, built from the identity
+      // the four-products (area model) line, built from the identity.
+      // Every term (except the first) is preceded by its own draggable sign slot.
       function areasLine(idn) {
         var rowTerm = { tl: idn.row[0], tr: idn.row[0], bl: idn.row[1], br: idn.row[1] };
         var colTerm = { tl: idn.col[0], tr: idn.col[1], bl: idn.col[0], br: idn.col[1] };
         var toks = [];
         CELL_KEYS.forEach(function (k, i) {
-          var ans = idn.cells[k];
-          if (i > 0 && ans.charAt(0) !== "-") toks.push(F("+"));
-          toks.push(S(k, ans, paren(rowTerm[k]) + "\\cdot " + paren(colTerm[k])));
+          var raw = idn.cells[k];
+          if (i > 0) toks.push(SGN("s_" + k, signOf(raw)));
+          toks.push(S(k, stripSign(raw), paren(rowTerm[k]) + "\\cdot " + paren(colTerm[k])));
         });
         return toks;
       }
@@ -272,24 +284,24 @@
             lhs: "(a+b)^2",
             steps: [
               { label: "Write as a product", tokens: [S("p1", "(a+b)"), S("p2", "(a+b)")] },
-              { label: "Expand each bracket", tokens: [S("g1a", "a"), S("g1b", "(a+b)"), F("+"), S("g2a", "b"), S("g2b", "(a+b)")] },
+              { label: "Expand each bracket", tokens: [S("g1a", "a"), S("g1b", "(a+b)"), SGN("sg", "+"), S("g2a", "b"), S("g2b", "(a+b)")] },
               { label: AREA, tokens: A },
-              { label: "Combine like terms", tokens: [F("a^2"), F("+"), S("m", "2ab"), F("+"), F("b^2")] }
+              { label: "Combine like terms", tokens: [F("a^2"), SGN("sm", "+"), S("m", "2ab"), F("+"), F("b^2")] }
             ]
           };
           if (id === "sq-diff") return {
             lhs: "(a-b)^2",
             steps: [
               { label: "Write as a product", tokens: [S("p1", "(a-b)"), S("p2", "(a-b)")] },
-              { label: "Expand each bracket", tokens: [S("g1a", "a"), S("g1b", "(a-b)"), F("-"), S("g2a", "b"), S("g2b", "(a-b)")] },
+              { label: "Expand each bracket", tokens: [S("g1a", "a"), S("g1b", "(a-b)"), SGN("sg", "-"), S("g2a", "b"), S("g2b", "(a-b)")] },
               { label: AREA, tokens: A },
-              { label: "Combine like terms", tokens: [F("a^2"), F("-"), S("m", "2ab"), F("+"), F("b^2")] }
+              { label: "Combine like terms", tokens: [F("a^2"), SGN("sm", "-"), S("m", "2ab"), F("+"), F("b^2")] }
             ]
           };
           return {
             lhs: "(a+b)(a-b)",
             steps: [
-              { label: "Expand each bracket", tokens: [S("g1a", "a"), S("g1b", "(a-b)"), F("+"), S("g2a", "b"), S("g2b", "(a-b)")] },
+              { label: "Expand each bracket", tokens: [S("g1a", "a"), S("g1b", "(a-b)"), SGN("sg", "+"), S("g2a", "b"), S("g2b", "(a-b)")] },
               { label: AREA, tokens: A }
             ],
             answer: "a^2-b^2",
@@ -301,7 +313,7 @@
           lhs: "a^2+2ab+b^2",
           steps: [
             { label: "Split into four areas (row × column)", tokens: A },
-            { label: "Group in pairs", tokens: [S("g1a", "a"), S("g1b", "(a+b)"), F("+"), S("g2a", "b"), S("g2b", "(a+b)")] },
+            { label: "Group in pairs", tokens: [S("g1a", "a"), S("g1b", "(a+b)"), SGN("sg", "+"), S("g2a", "b"), S("g2b", "(a+b)")] },
             { label: "Take out the common factor", tokens: [S("f1", "(a+b)"), S("f2", "(a+b)")] }
           ],
           answer: "(a+b)^2"
@@ -310,7 +322,7 @@
           lhs: "a^2-2ab+b^2",
           steps: [
             { label: "Split into four areas (row × column)", tokens: A },
-            { label: "Group in pairs", tokens: [S("g1a", "a"), S("g1b", "(a-b)"), F("-"), S("g2a", "b"), S("g2b", "(a-b)")] },
+            { label: "Group in pairs", tokens: [S("g1a", "a"), S("g1b", "(a-b)"), SGN("sg", "-"), S("g2a", "b"), S("g2b", "(a-b)")] },
             { label: "Take out the common factor", tokens: [S("f1", "(a-b)"), S("f2", "(a-b)")] }
           ],
           answer: "(a-b)^2"
@@ -319,7 +331,7 @@
           lhs: "a^2-b^2",
           steps: [
             { label: "Split into four areas (row × column)", tokens: A },
-            { label: "Group in pairs", tokens: [S("g1a", "a"), S("g1b", "(a+b)"), F("-"), S("g2a", "b"), S("g2b", "(a+b)")] },
+            { label: "Group in pairs", tokens: [S("g1a", "a"), S("g1b", "(a+b)"), SGN("sg", "-"), S("g2a", "b"), S("g2b", "(a+b)")] },
             { label: "Take out the common factor", tokens: [S("f1", "(a+b)"), S("f2", "(a-b)")] }
           ]
         };
@@ -347,11 +359,11 @@
       }
 
       // ── Tile bank ──
-      function bankVals() {
+      function bankTerms() {
         var out = [], seen = {};
         state.def.steps.forEach(function (st) {
           st.tokens.forEach(function (tk) {
-            if (tk.slot && !seen[tk.ans]) { seen[tk.ans] = 1; out.push(tk.ans); }
+            if (tk.slot && !tk.sign && !seen[tk.ans]) { seen[tk.ans] = 1; out.push(tk.ans); }
           });
         });
         return out;
@@ -366,26 +378,44 @@
         if (!was) { state.selectedTile = val; tileEl.classList.add("selected"); }
         renderFlow();
       }
+      function makeTile(val, extraClass) {
+        var t = document.createElement("span");
+        t.className = "tile " + extraClass;
+        t.tabIndex = 0;
+        kx(t, val);
+        t.addEventListener("click", function () { selectTile(t, val); });
+        t.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectTile(t, val); }
+        });
+        if (!TOUCH) {
+          t.draggable = true;
+          t.addEventListener("dragstart", function (e) {
+            e.dataTransfer.setData("text/plain", val);
+            e.dataTransfer.effectAllowed = "copy";
+          });
+        }
+        return t;
+      }
       function buildTiles() {
         clear(tilesEl);
-        bankVals().forEach(function (val) {
-          var t = document.createElement("span");
-          t.className = "tile " + colorClass(val);
-          t.tabIndex = 0;
-          kx(t, val);
-          t.addEventListener("click", function () { selectTile(t, val); });
-          t.addEventListener("keydown", function (e) {
-            if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectTile(t, val); }
-          });
-          if (!TOUCH) {
-            t.draggable = true;
-            t.addEventListener("dragstart", function (e) {
-              e.dataTransfer.setData("text/plain", val);
-              e.dataTransfer.effectAllowed = "copy";
-            });
-          }
-          tilesEl.appendChild(t);
-        });
+
+        var signLabel = document.createElement("div");
+        signLabel.className = "tiles-sub";
+        signLabel.textContent = "Signs";
+        tilesEl.appendChild(signLabel);
+        var signRow = document.createElement("div");
+        signRow.className = "tiles-row";
+        ["+", "-"].forEach(function (s) { signRow.appendChild(makeTile(s, "sign")); });
+        tilesEl.appendChild(signRow);
+
+        var termLabel = document.createElement("div");
+        termLabel.className = "tiles-sub";
+        termLabel.textContent = "Terms";
+        tilesEl.appendChild(termLabel);
+        var termRow = document.createElement("div");
+        termRow.className = "tiles-row";
+        bankTerms().forEach(function (val) { termRow.appendChild(makeTile(val, colorClass(val))); });
+        tilesEl.appendChild(termRow);
       }
 
       // ── Step / slot rendering ──
@@ -404,9 +434,6 @@
         updateNav();
       }
 
-      function stepHasSlots(i) {
-        return state.def.steps[i].tokens.some(function (tk) { return tk.slot; });
-      }
       function stepSatisfied(i) {
         var ok = true;
         state.def.steps[i].tokens.forEach(function (tk) {
@@ -423,18 +450,19 @@
       }
 
       function renderSlot(tok, active) {
+        var slotKind = tok.sign ? "sign" : "term";
         var slot = document.createElement("div");
-        slot.className = "slot " + colorClass(tok.ans);
+        slot.className = "slot " + (tok.sign ? "sign-slot" : colorClass(tok.ans));
         var val = state.placed[tok.id];
         if (val == null) {
           var ph = document.createElement("span");
           ph.className = "ph";
-          ph.textContent = "?";
+          ph.textContent = tok.sign ? "\u00b1" : "?";
           slot.appendChild(ph);
           if (active) {
-            if (state.selectedTile) slot.classList.add("target");
+            if (state.selectedTile && valKind(state.selectedTile) === slotKind) slot.classList.add("target");
             slot.addEventListener("click", function () {
-              if (state.selectedTile) place(tok.id, state.selectedTile);
+              if (state.selectedTile && valKind(state.selectedTile) === slotKind) place(tok.id, state.selectedTile);
             });
             slot.addEventListener("dragover", function (e) {
               e.preventDefault(); e.dataTransfer.dropEffect = "copy"; slot.classList.add("drag-over");
@@ -443,7 +471,7 @@
             slot.addEventListener("drop", function (e) {
               e.preventDefault(); slot.classList.remove("drag-over");
               var v = e.dataTransfer.getData("text/plain");
-              if (v) place(tok.id, v);
+              if (v && valKind(v) === slotKind) place(tok.id, v);
             });
           }
         } else {
