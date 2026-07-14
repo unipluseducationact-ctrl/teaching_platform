@@ -56,51 +56,68 @@
     .prompt .lead { font-size: 15px; color: var(--dim); font-weight: 600; }
     .prompt .expr { font-size: 30px; margin-top: 4px; color: var(--ink); }
     .prompt .expr .katex { font-size: 1.15em; }
-    .note { text-align: center; font-size: 14px; color: var(--dim); margin: 10px 0 18px; line-height: 1.5; }
+    .note { text-align: center; font-size: 14px; color: var(--dim); margin: 10px 0 14px; line-height: 1.5; }
 
-    .area-wrap { margin: 0 auto; overflow-x: auto; padding-bottom: 4px; }
-    .area-row { display: flex; align-items: flex-start; justify-content: center; gap: 8px; min-width: min-content; padding: 4px 2px; }
-    .term-group { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-    .term-label { min-height: 22px; font-size: 15px; color: var(--dim); white-space: nowrap; }
-    .plus { min-height: 76px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; color: var(--dim); }
-    .cell {
-      width: 104px; min-height: 76px; border: 2px dashed rgba(0,0,0,.22); border-radius: 12px;
+    /* ── Step flow ── */
+    .flow { display: flex; flex-direction: column; gap: 10px; }
+    .step {
+      border: 1px solid var(--line); border-left: 4px solid transparent; border-radius: 12px;
+      background: #fff; padding: 12px 16px; transition: border-color .15s, background .15s;
+    }
+    .step.active { border-left-color: var(--ab); box-shadow: 0 2px 6px rgba(0,0,0,.06); }
+    .step.locked { background: #fbfaf6; border-left-color: rgba(46,125,50,.35); }
+    .step-head { display: flex; align-items: center; gap: 9px; margin-bottom: 10px; }
+    .step-no {
+      width: 22px; height: 22px; border-radius: 999px; flex: none;
+      background: var(--panel2); color: var(--dim); font-size: 12px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .step.active .step-no { background: var(--ab-fill); color: #06283d; }
+    .step.locked .step-no { background: var(--ab); color: #fff; }
+    .step-label { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--dim); font-weight: 700; }
+    .step-eq { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 6px; }
+    .step-eq .eq { font-size: 24px; color: var(--dim); font-weight: 700; align-self: center; padding-bottom: 2px; }
+    .tokens { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 6px; }
+    .tok { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .tok-cap { font-size: 12px; color: var(--dim); min-height: 15px; white-space: nowrap; }
+    .tok-fix { font-size: 22px; padding-bottom: 6px; }
+    .tok-fix .katex { font-size: 1.02em; }
+
+    .slot {
+      min-width: 62px; min-height: 46px; padding: 0 10px;
+      border: 2px dashed rgba(0,0,0,.22); border-radius: 10px; background: #fff;
       display: flex; align-items: center; justify-content: center; position: relative;
-      background: #fff; transition: border-color .15s, background .15s;
-      box-shadow: inset 0 0 0 1px rgba(0,0,0,.03);
+      font-size: 20px; transition: border-color .15s, background .15s;
     }
-    .cell.drag-over { border-color: var(--a); background: rgba(79,195,247,.12); }
-    .cell.filled { border-style: solid; }
-    .cell.correct { border-color: var(--ab); box-shadow: 0 0 0 1px var(--ab) inset; background: rgba(129,199,132,.14); }
-    .cell.wrong { border-color: var(--bad); box-shadow: 0 0 0 1px var(--bad) inset; background: rgba(198,40,40,.08); }
-    .cell.slot-targetable { border-color: var(--a); background: rgba(79,195,247,.08); }
-    .cell-val { font-size: 22px; font-weight: 700; }
-    .cell-clear {
-      position: absolute; top: 3px; right: 5px; background: none; border: none; color: var(--dim);
-      font-size: 16px; cursor: pointer; line-height: 1; padding: 2px 4px;
+    .slot.target { border-color: var(--a); background: rgba(79,195,247,.10); }
+    .slot.drag-over { border-color: var(--a); background: rgba(79,195,247,.20); }
+    .slot.correct { border-style: solid; border-color: var(--ab); background: rgba(129,199,132,.16); }
+    .slot.wrong { border-style: solid; border-color: var(--bad); background: rgba(198,40,40,.08); }
+    .slot .ph { color: rgba(0,0,0,.25); font-weight: 700; font-size: 22px; }
+    .slot.a .katex { color: var(--a); }
+    .slot.b .katex { color: var(--b); }
+    .slot.ab .katex { color: var(--ab); }
+    .slot-clear {
+      position: absolute; top: -9px; right: -9px; width: 19px; height: 19px; border-radius: 999px;
+      border: 1px solid var(--line); background: #fff; color: var(--dim); font-size: 12px; line-height: 1;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
     }
-    .cell-clear:hover { color: var(--ink); }
-    .cell-placeholder { color: rgba(0,0,0,.25); font-size: 24px; font-weight: 700; }
+    .slot-clear:hover { color: var(--bad); border-color: var(--bad); }
+    .step.locked .slot { border-style: solid; border-color: var(--ab); background: rgba(129,199,132,.14); }
 
-    .verdict { text-align: center; min-height: 26px; margin-top: 14px; font-size: 16px; font-weight: 700; }
+    .answer-line {
+      margin-top: 4px; text-align: center; font-size: 24px; color: var(--ink);
+      background: rgba(129,199,132,.18); border: 1px solid rgba(46,125,50,.3); border-radius: 12px;
+      padding: 12px; animation: stepIn .25s ease;
+    }
+    .answer-line .katex { font-size: 1.05em; }
+    .answer-note { text-align: center; font-size: 13px; color: var(--dim); margin-top: 6px; }
+    @keyframes stepIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: none; } }
+
+    .verdict { text-align: center; min-height: 24px; margin-top: 14px; font-size: 15px; font-weight: 700; }
     .verdict.ok { color: var(--ab); }
     .verdict.bad { color: var(--bad); }
     .verdict.neutral { color: var(--dim); font-weight: 600; font-size: 14px; }
-
-    .reveal {
-      margin: 6px 0 22px; background: #fff; border: 1px solid var(--line);
-      border-left: 5px solid var(--ab); border-radius: 12px; padding: 16px 20px 18px;
-      box-shadow: 0 1px 2px rgba(0,0,0,.03);
-    }
-    .reveal .eq-label { text-align: center; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--ab); font-weight: 700; margin-bottom: 14px; }
-    .steps-grid { display: grid; grid-template-columns: auto auto; column-gap: 10px; row-gap: 8px; justify-content: center; align-items: baseline; overflow-x: auto; }
-    .step-lhs { text-align: right; font-size: 22px; color: var(--ink); }
-    .step-rhs { text-align: left; font-size: 22px; color: var(--ink); padding: 3px 10px; border-radius: 8px; white-space: nowrap; }
-    .step-lhs .katex, .step-rhs .katex { font-size: 1.04em; }
-    .step-rhs.is-new { background: rgba(129,199,132,.24); box-shadow: 0 0 0 1px rgba(46,125,50,.25) inset; animation: stepIn .25s ease; }
-    @keyframes stepIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: none; } }
-    .steps-hint { text-align: center; color: var(--dim); font-size: 14px; padding: 6px 0; }
-    .reveal-nav { display: flex; justify-content: center; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
 
     .btn {
       background: var(--panel); border: 1px solid var(--line); color: var(--ink); font: inherit;
@@ -108,15 +125,15 @@
     }
     .btn:hover { border-color: var(--a); }
     .btn.primary { background: var(--ab-fill); color: #06283d; border-color: var(--ab-fill); }
-    .board-nav { display: flex; justify-content: center; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+    .flow-nav { display: flex; justify-content: center; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
 
-    .tile-bank { background: var(--panel2); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; }
+    .tile-bank { background: var(--panel2); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; position: sticky; top: 16px; }
     .tile-bank h4 { margin: 0 0 4px; font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink); font-weight: 700; }
     .bank-hint { font-size: 12px; color: var(--dim); margin: 0 0 12px; line-height: 1.45; }
     .tiles { display: flex; flex-wrap: wrap; gap: 10px; }
     .tile {
       display: inline-flex; align-items: center; justify-content: center; min-width: 52px; height: 46px;
-      padding: 0 12px; border-radius: 10px; font-weight: 700; font-size: 18px;
+      padding: 0 14px; border-radius: 10px; font-weight: 700; font-size: 18px;
       cursor: grab; user-select: none; border: 1px solid var(--line); background: #fff;
     }
     .tile:active { cursor: grabbing; opacity: .85; }
@@ -124,9 +141,7 @@
     .tile.a  { background: rgba(79,195,247,.22); color: var(--a); border-color: rgba(2,119,189,.4); }
     .tile.b  { background: rgba(255,213,79,.28); color: var(--b); border-color: rgba(154,114,9,.4); }
     .tile.ab { background: rgba(129,199,132,.28); color: var(--ab); border-color: rgba(46,125,50,.4); }
-    .cell.a  .cell-val { color: var(--a); }
-    .cell.b  .cell-val { color: var(--b); }
-    .cell.ab .cell-val { color: var(--ab); }
+    .tile.grp { background: #fff; color: var(--ink); border-color: rgba(0,0,0,.18); }
 
     .legend { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
     .legend-title { margin: 0 0 10px; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink); font-weight: 700; }
@@ -137,8 +152,8 @@
       main { padding: 16px 16px 40px; }
       header { padding: 14px 16px; }
       .prompt .expr { font-size: 25px; }
-      .reveal .eq-line { font-size: 18px; }
-      .cell { min-height: 64px; }
+      .step-eq .eq { font-size: 20px; }
+      .slot { min-width: 54px; min-height: 42px; font-size: 18px; }
       .tile { min-width: 46px; height: 42px; font-size: 16px; }
     }
   </style>
@@ -166,30 +181,20 @@
           <div class="expr" id="prompt-expr"></div>
         </div>
 
-        <div class="reveal" id="reveal">
-          <div class="eq-label" id="reveal-label"></div>
-          <div class="steps-grid" id="reveal-lines"></div>
-          <div class="steps-hint" id="reveal-hint"></div>
-          <div class="reveal-nav">
-            <button class="btn primary" id="combine-btn" type="button"></button>
-          </div>
-        </div>
-
         <p class="note" id="board-note"></p>
 
-        <div class="area-wrap">
-          <div class="area-row" id="area-row"></div>
-        </div>
+        <div class="flow" id="flow"></div>
 
         <div class="verdict neutral" id="verdict"></div>
 
-        <div class="board-nav">
+        <div class="flow-nav">
+          <button class="btn primary" id="next-btn" type="button">Next step →</button>
           <button class="btn" id="reset-btn" type="button">Clear board</button>
         </div>
       </div>
 
       <aside class="tile-bank">
-        <h4>Area tiles</h4>
+        <h4>Term tiles</h4>
         <p class="bank-hint" id="bank-hint"></p>
         <div class="tiles" id="tiles"></div>
         <div class="legend">
@@ -207,24 +212,11 @@
       "use strict";
 
       var IDENTITIES = {
-        "sq-sum": {
-          chip: "(a+b)^2", factored: "(a+b)^2", expanded: "a^2+2ab+b^2",
-          col: ["a", "b"], row: ["a", "b"],
-          cells: { tl: "a^2", tr: "ab", bl: "ab", br: "b^2" }
-        },
-        "sq-diff": {
-          chip: "(a-b)^2", factored: "(a-b)^2", expanded: "a^2-2ab+b^2",
-          col: ["a", "-b"], row: ["a", "-b"],
-          cells: { tl: "a^2", tr: "-ab", bl: "-ab", br: "b^2" }
-        },
-        "diff-sq": {
-          chip: "a^2-b^2", factored: "(a+b)(a-b)", expanded: "a^2-b^2",
-          col: ["a", "b"], row: ["a", "-b"],
-          cells: { tl: "a^2", tr: "ab", bl: "-ab", br: "-b^2" }
-        }
+        "sq-sum": { chip: "(a+b)^2", row: ["a", "b"], col: ["a", "b"], cells: { tl: "a^2", tr: "ab", bl: "ab", br: "b^2" } },
+        "sq-diff": { chip: "(a-b)^2", row: ["a", "-b"], col: ["a", "-b"], cells: { tl: "a^2", tr: "-ab", bl: "-ab", br: "b^2" } },
+        "diff-sq": { chip: "a^2-b^2", row: ["a", "-b"], col: ["a", "b"], cells: { tl: "a^2", tr: "ab", bl: "-ab", br: "-b^2" } }
       };
       var ORDER = ["sq-sum", "sq-diff", "diff-sq"];
-      var TILE_BANK = ["a^2", "ab", "-ab", "b^2", "-b^2", "2ab", "-2ab"];
       var CELL_KEYS = ["tl", "tr", "bl", "br"];
 
       var TOUCH = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
@@ -232,49 +224,110 @@
       var state = {
         id: "sq-sum",
         mode: "expand",
-        placed: { tl: null, tr: null, bl: null, br: null },
-        revealStage: 0,
+        def: null,
+        slotAns: {},
+        stepIndex: 0,
+        placed: {},
         selectedTile: null
       };
 
       function $(id) { return document.getElementById(id); }
       function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
-      function kx(el, tex, display) {
+      function kx(el, tex) {
         clear(el);
-        try { katex.render(tex, el, { throwOnError: false, displayMode: !!display }); }
+        try { katex.render(tex, el, { throwOnError: false }); }
         catch (e) { el.textContent = tex; }
       }
+      function paren(t) { return t.charAt(0) === "-" ? "(" + t + ")" : t; }
       function colorClass(v) {
+        if (v.indexOf("(") !== -1) return "grp";
         if (v.indexOf("a^2") !== -1) return "a";
         if (v.indexOf("b^2") !== -1) return "b";
         return "ab";
       }
-      function paren(t) { return t.charAt(0) === "-" ? "(" + t + ")" : t; }
 
-      var HL = "#2E7D32";
-      function c(t) { return "\\textcolor{" + HL + "}{" + t + "}"; }
+      // token helpers
+      function F(t) { return { fix: t }; }
+      function S(id, ans, cap) { return { slot: true, id: id, ans: ans, cap: cap }; }
 
-      function stepsFor(id, mode) {
-        var S = {
-          "sq-sum": {
-            expand: { lhs: "(a+b)^2", rhs: ["(a+b)(a+b)", "a(a+b)+b(a+b)", "a^2+" + c("ab") + "+" + c("ab") + "+b^2", "a^2+" + c("2ab") + "+b^2"] },
-            factor: { lhs: "a^2+2ab+b^2", rhs: ["a^2+" + c("ab") + "+" + c("ab") + "+b^2", "a(a+b)+b(a+b)", "(a+b)(a+b)", "(a+b)^2"] }
-          },
-          "sq-diff": {
-            expand: { lhs: "(a-b)^2", rhs: ["(a-b)(a-b)", "a(a-b)-b(a-b)", "a^2-" + c("ab") + "-" + c("ab") + "+b^2", "a^2-" + c("2ab") + "+b^2"] },
-            factor: { lhs: "a^2-2ab+b^2", rhs: ["a^2-" + c("ab") + "-" + c("ab") + "+b^2", "a(a-b)-b(a-b)", "(a-b)(a-b)", "(a-b)^2"] }
-          },
-          "diff-sq": {
-            expand: { lhs: "(a+b)(a-b)", rhs: ["a(a-b)+b(a-b)", "a^2-" + c("ab") + "+" + c("ab") + "-b^2", "a^2-b^2"] },
-            factor: { lhs: "a^2-b^2", rhs: ["a^2-" + c("ab") + "+" + c("ab") + "-b^2", "a(a-b)+b(a-b)", "(a+b)(a-b)"] }
-          }
+      // the four-products (area model) line, built from the identity
+      function areasLine(idn) {
+        var rowTerm = { tl: idn.row[0], tr: idn.row[0], bl: idn.row[1], br: idn.row[1] };
+        var colTerm = { tl: idn.col[0], tr: idn.col[1], bl: idn.col[0], br: idn.col[1] };
+        var toks = [];
+        CELL_KEYS.forEach(function (k, i) {
+          var ans = idn.cells[k];
+          if (i > 0 && ans.charAt(0) !== "-") toks.push(F("+"));
+          toks.push(S(k, ans, paren(rowTerm[k]) + "\\cdot " + paren(colTerm[k])));
+        });
+        return toks;
+      }
+
+      function DEF(id, mode) {
+        var idn = IDENTITIES[id];
+        var A = areasLine(idn);
+        var AREA = "Fill the four areas (row × column)";
+        if (mode === "expand") {
+          if (id === "sq-sum") return {
+            lhs: "(a+b)^2",
+            steps: [
+              { label: "Write as a product", tokens: [S("p1", "(a+b)"), S("p2", "(a+b)")] },
+              { label: "Expand each bracket", tokens: [S("g1", "a(a+b)"), F("+"), S("g2", "b(a+b)")] },
+              { label: AREA, tokens: A },
+              { label: "Combine like terms", tokens: [F("a^2"), F("+"), S("m", "2ab"), F("+"), F("b^2")] }
+            ]
+          };
+          if (id === "sq-diff") return {
+            lhs: "(a-b)^2",
+            steps: [
+              { label: "Write as a product", tokens: [S("p1", "(a-b)"), S("p2", "(a-b)")] },
+              { label: "Expand each bracket", tokens: [S("g1", "a(a-b)"), F("-"), S("g2", "b(a-b)")] },
+              { label: AREA, tokens: A },
+              { label: "Combine like terms", tokens: [F("a^2"), F("-"), S("m", "2ab"), F("+"), F("b^2")] }
+            ]
+          };
+          return {
+            lhs: "(a+b)(a-b)",
+            steps: [
+              { label: "Expand each bracket", tokens: [S("g1", "a(a-b)"), F("+"), S("g2", "b(a-b)")] },
+              { label: AREA, tokens: A }
+            ],
+            answer: "a^2-b^2",
+            note: "The +ab and −ab areas cancel out."
+          };
+        }
+        // factorize
+        if (id === "sq-sum") return {
+          lhs: "a^2+2ab+b^2",
+          steps: [
+            { label: "Split into four areas (row × column)", tokens: A },
+            { label: "Group in pairs", tokens: [S("g1", "a(a+b)"), F("+"), S("g2", "b(a+b)")] },
+            { label: "Take out the common factor", tokens: [S("f1", "(a+b)"), S("f2", "(a+b)")] }
+          ],
+          answer: "(a+b)^2"
         };
-        return S[id][mode === "expand" ? "expand" : "factor"];
+        if (id === "sq-diff") return {
+          lhs: "a^2-2ab+b^2",
+          steps: [
+            { label: "Split into four areas (row × column)", tokens: A },
+            { label: "Group in pairs", tokens: [S("g1", "a(a-b)"), F("-"), S("g2", "b(a-b)")] },
+            { label: "Take out the common factor", tokens: [S("f1", "(a-b)"), S("f2", "(a-b)")] }
+          ],
+          answer: "(a-b)^2"
+        };
+        return {
+          lhs: "a^2-b^2",
+          steps: [
+            { label: "Split into four areas (row × column)", tokens: A },
+            { label: "Group in pairs", tokens: [S("g1", "a(a+b)"), F("-"), S("g2", "b(a+b)")] },
+            { label: "Take out the common factor", tokens: [S("f1", "(a+b)"), S("f2", "(a-b)")] }
+          ]
+        };
       }
 
       var chipsEl = $("identity-chips");
-      var cellEls = {};
       var tilesEl = $("tiles");
+      var flowEl = $("flow");
 
       // ── Identity chips ──
       function buildChips() {
@@ -283,42 +336,41 @@
           var b = document.createElement("button");
           b.className = "chip" + (id === state.id ? " active" : "");
           b.type = "button";
-          b.dataset.id = id;
           kx(b, IDENTITIES[id].chip);
           b.addEventListener("click", function () {
             state.id = id;
-            resetBoard();
             buildChips();
-            render();
+            setupDef();
           });
           chipsEl.appendChild(b);
         });
       }
 
-      // ── Tile bank (reusable tiles) ──
+      // ── Tile bank ──
+      function bankVals() {
+        var out = [], seen = {};
+        state.def.steps.forEach(function (st) {
+          st.tokens.forEach(function (tk) {
+            if (tk.slot && !seen[tk.ans]) { seen[tk.ans] = 1; out.push(tk.ans); }
+          });
+        });
+        return out;
+      }
       function clearTileSelection() {
         state.selectedTile = null;
         tilesEl.querySelectorAll(".tile.selected").forEach(function (t) { t.classList.remove("selected"); });
-        Object.keys(cellEls).forEach(function (k) { cellEls[k].classList.remove("slot-targetable"); });
       }
       function selectTile(tileEl, val) {
-        if (state.selectedTile === val && tileEl.classList.contains("selected")) {
-          clearTileSelection();
-          return;
-        }
+        var was = state.selectedTile === val && tileEl.classList.contains("selected");
         clearTileSelection();
-        state.selectedTile = val;
-        tileEl.classList.add("selected");
-        CELL_KEYS.forEach(function (k) {
-          if (!state.placed[k]) cellEls[k].classList.add("slot-targetable");
-        });
+        if (!was) { state.selectedTile = val; tileEl.classList.add("selected"); }
+        renderFlow();
       }
       function buildTiles() {
         clear(tilesEl);
-        TILE_BANK.forEach(function (val) {
+        bankVals().forEach(function (val) {
           var t = document.createElement("span");
           t.className = "tile " + colorClass(val);
-          t.dataset.val = val;
           t.tabIndex = 0;
           kx(t, val);
           t.addEventListener("click", function () { selectTile(t, val); });
@@ -336,206 +388,206 @@
         });
       }
 
-      // ── Cells ──
-      function placeInCell(key, val) {
-        state.placed[key] = val;
+      // ── Step / slot rendering ──
+      function place(slotId, val) {
+        state.placed[slotId] = val;
         clearTileSelection();
-        renderCell(key);
-        updateCheck();
+        afterChange();
       }
-      function attachCell(key, el) {
-        el.addEventListener("dragover", function (e) {
-          e.preventDefault();
-          e.dataTransfer.dropEffect = "copy";
-          el.classList.add("drag-over");
-        });
-        el.addEventListener("dragleave", function () { el.classList.remove("drag-over"); });
-        el.addEventListener("drop", function (e) {
-          e.preventDefault();
-          el.classList.remove("drag-over");
-          var val = e.dataTransfer.getData("text/plain");
-          if (val) placeInCell(key, val);
-        });
-        el.addEventListener("click", function () {
-          if (state.selectedTile) placeInCell(key, state.selectedTile);
-        });
+      function removeSlot(slotId) {
+        delete state.placed[slotId];
+        afterChange();
+      }
+      function afterChange() {
+        renderFlow();
+        updateVerdict();
+        updateNav();
       }
 
-      function buildArea() {
-        var idn = IDENTITIES[state.id];
-        var rowTerm = { tl: idn.row[0], tr: idn.row[0], bl: idn.row[1], br: idn.row[1] };
-        var colTerm = { tl: idn.col[0], tr: idn.col[1], bl: idn.col[0], br: idn.col[1] };
-        var area = $("area-row");
-        clear(area);
-        cellEls = {};
-        CELL_KEYS.forEach(function (key, i) {
-          if (i > 0) {
-            var pg = document.createElement("div");
-            pg.className = "term-group";
-            var sp = document.createElement("div");
-            sp.className = "term-label";
-            sp.innerHTML = "&nbsp;";
-            var plus = document.createElement("div");
-            plus.className = "plus";
-            plus.textContent = "+";
-            pg.appendChild(sp);
-            pg.appendChild(plus);
-            area.appendChild(pg);
-          }
-          var group = document.createElement("div");
-          group.className = "term-group";
-          var lab = document.createElement("div");
-          lab.className = "term-label";
-          kx(lab, paren(rowTerm[key]) + "\\times " + paren(colTerm[key]));
-          var cell = document.createElement("div");
-          cell.className = "cell";
-          cell.dataset.cell = key;
-          var ph = document.createElement("span");
-          ph.className = "cell-placeholder";
-          ph.textContent = "?";
-          cell.appendChild(ph);
-          group.appendChild(lab);
-          group.appendChild(cell);
-          area.appendChild(group);
-          cellEls[key] = cell;
-          attachCell(key, cell);
+      function stepHasSlots(i) {
+        return state.def.steps[i].tokens.some(function (tk) { return tk.slot; });
+      }
+      function stepSatisfied(i) {
+        var ok = true;
+        state.def.steps[i].tokens.forEach(function (tk) {
+          if (tk.slot && state.placed[tk.id] !== tk.ans) ok = false;
         });
+        return ok;
+      }
+      function stepHasWrong(i) {
+        var bad = false;
+        state.def.steps[i].tokens.forEach(function (tk) {
+          if (tk.slot && state.placed[tk.id] != null && state.placed[tk.id] !== tk.ans) bad = true;
+        });
+        return bad;
       }
 
-      function renderCell(key) {
-        var el = cellEls[key];
-        var val = state.placed[key];
-        clear(el);
-        el.className = "cell";
+      function renderSlot(tok, active) {
+        var slot = document.createElement("div");
+        slot.className = "slot " + colorClass(tok.ans);
+        var val = state.placed[tok.id];
         if (val == null) {
           var ph = document.createElement("span");
-          ph.className = "cell-placeholder";
+          ph.className = "ph";
           ph.textContent = "?";
-          el.appendChild(ph);
-          return;
-        }
-        el.classList.add("filled", colorClass(val));
-        var span = document.createElement("span");
-        span.className = "cell-val";
-        kx(span, val);
-        el.appendChild(span);
-        var btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "cell-clear";
-        btn.title = "Clear";
-        btn.textContent = "\u00d7";
-        btn.addEventListener("click", function (e) {
-          e.stopPropagation();
-          state.placed[key] = null;
-          renderCell(key);
-          updateCheck();
-        });
-        el.appendChild(btn);
-      }
-
-      // ── Check + reveal ──
-      function updateCheck() {
-        var idn = IDENTITIES[state.id];
-        var verdict = $("verdict");
-        var filled = CELL_KEYS.every(function (k) { return state.placed[k] != null; });
-
-        if (!filled) {
-          state.revealStage = 0;
-          CELL_KEYS.forEach(function (k) {
-            cellEls[k].classList.remove("correct", "wrong");
-          });
-          verdict.className = "verdict neutral";
-          verdict.textContent = TOUCH
-            ? "Tap a tile, then tap a cell to place it."
-            : "Drag a tile into each of the four cells.";
-          renderReveal();
-          return;
-        }
-
-        var allOk = true;
-        CELL_KEYS.forEach(function (k) {
-          var ok = state.placed[k] === idn.cells[k];
-          cellEls[k].classList.toggle("correct", ok);
-          cellEls[k].classList.toggle("wrong", !ok);
-          if (!ok) allOk = false;
-        });
-
-        if (allOk) {
-          verdict.className = "verdict ok";
-          verdict.textContent = "\u2713 Correct — every area matches.";
-          if (state.revealStage < 1) state.revealStage = 1;
+          slot.appendChild(ph);
+          if (active) {
+            if (state.selectedTile) slot.classList.add("target");
+            slot.addEventListener("click", function () {
+              if (state.selectedTile) place(tok.id, state.selectedTile);
+            });
+            slot.addEventListener("dragover", function (e) {
+              e.preventDefault(); e.dataTransfer.dropEffect = "copy"; slot.classList.add("drag-over");
+            });
+            slot.addEventListener("dragleave", function () { slot.classList.remove("drag-over"); });
+            slot.addEventListener("drop", function (e) {
+              e.preventDefault(); slot.classList.remove("drag-over");
+              var v = e.dataTransfer.getData("text/plain");
+              if (v) place(tok.id, v);
+            });
+          }
         } else {
-          verdict.className = "verdict bad";
-          verdict.textContent = "\u2717 Some areas are wrong — check the row \u00d7 column products.";
-          state.revealStage = 0;
+          var v = document.createElement("span");
+          kx(v, val);
+          slot.appendChild(v);
+          slot.classList.add(val === tok.ans ? "correct" : "wrong");
+          if (active) {
+            var x = document.createElement("button");
+            x.type = "button"; x.className = "slot-clear"; x.textContent = "\u00d7"; x.title = "Clear";
+            x.addEventListener("click", function (e) { e.stopPropagation(); removeSlot(tok.id); });
+            slot.appendChild(x);
+          }
         }
-        renderReveal();
+        return slot;
       }
 
-      function renderReveal() {
-        var label = $("reveal-label");
-        var grid = $("reveal-lines");
-        var hint = $("reveal-hint");
-        var btn = $("combine-btn");
-        label.textContent = state.mode === "expand" ? "Expansion" : "Factorization";
+      function renderStep(step, i) {
+        var active = i === state.stepIndex;
+        var wrap = document.createElement("div");
+        wrap.className = "step " + (active ? "active" : "locked");
 
-        if (state.revealStage < 1) {
-          clear(grid);
-          hint.style.display = "";
-          hint.textContent = "Fill the area model below correctly to build the steps.";
-          btn.style.display = "none";
+        var head = document.createElement("div");
+        head.className = "step-head";
+        var no = document.createElement("span");
+        no.className = "step-no";
+        no.textContent = i + 1;
+        var lab = document.createElement("span");
+        lab.className = "step-label";
+        lab.textContent = step.label;
+        head.appendChild(no); head.appendChild(lab);
+        wrap.appendChild(head);
+
+        var eq = document.createElement("div");
+        eq.className = "step-eq";
+        var eqs = document.createElement("span");
+        eqs.className = "eq";
+        eqs.textContent = "=";
+        eq.appendChild(eqs);
+
+        var tokensWrap = document.createElement("div");
+        tokensWrap.className = "tokens";
+        var hasCap = step.tokens.some(function (tk) { return tk.slot && tk.cap; });
+        step.tokens.forEach(function (tk) {
+          var tokEl = document.createElement("div");
+          tokEl.className = "tok";
+          if (hasCap) {
+            var cap = document.createElement("div");
+            cap.className = "tok-cap";
+            if (tk.slot && tk.cap) kx(cap, tk.cap); else cap.innerHTML = "&nbsp;";
+            tokEl.appendChild(cap);
+          }
+          if (tk.slot) {
+            tokEl.appendChild(renderSlot(tk, active));
+          } else {
+            var fx = document.createElement("div");
+            fx.className = "tok-fix";
+            kx(fx, tk.fix);
+            tokEl.appendChild(fx);
+          }
+          tokensWrap.appendChild(tokEl);
+        });
+        eq.appendChild(tokensWrap);
+        wrap.appendChild(eq);
+        return wrap;
+      }
+
+      function renderFlow() {
+        clear(flowEl);
+        var N = state.def.steps.length;
+        var upto = Math.min(state.stepIndex, N - 1);
+        for (var i = 0; i <= upto; i++) {
+          flowEl.appendChild(renderStep(state.def.steps[i], i));
+        }
+        if (state.stepIndex >= N && state.def.answer) {
+          var ans = document.createElement("div");
+          ans.className = "answer-line";
+          kx(ans, "= " + state.def.answer);
+          flowEl.appendChild(ans);
+          if (state.def.note) {
+            var nt = document.createElement("div");
+            nt.className = "answer-note";
+            nt.textContent = state.def.note;
+            flowEl.appendChild(nt);
+          }
+        }
+      }
+
+      function updateVerdict() {
+        var v = $("verdict");
+        var N = state.def.steps.length;
+        if (state.stepIndex >= N) {
+          v.className = "verdict ok";
+          v.textContent = "\u2713 Complete — every step matches.";
           return;
         }
-
-        hint.style.display = "none";
-        var steps = stepsFor(state.id, state.mode);
-        var shown = Math.min(state.revealStage, steps.rhs.length);
-        clear(grid);
-        for (var i = 0; i < shown; i++) {
-          var lc = document.createElement("div");
-          lc.className = "step-lhs";
-          if (i === 0) kx(lc, steps.lhs);
-          var rc = document.createElement("div");
-          rc.className = "step-rhs" + (i === shown - 1 ? " is-new" : "");
-          kx(rc, "= " + steps.rhs[i]);
-          grid.appendChild(lc);
-          grid.appendChild(rc);
+        if (stepHasWrong(state.stepIndex)) {
+          v.className = "verdict bad";
+          v.textContent = "\u2717 Check the red slots — they don't match.";
+        } else if (stepSatisfied(state.stepIndex)) {
+          v.className = "verdict ok";
+          v.textContent = "\u2713 Step correct — press Next step \u2192";
+        } else {
+          v.className = "verdict neutral";
+          v.textContent = TOUCH
+            ? "Tap a tile, then tap a slot to fill it."
+            : "Drag a tile into each slot (or tap tile then slot).";
         }
-        btn.textContent = "Next step →";
-        btn.style.display = shown >= steps.rhs.length ? "none" : "";
       }
 
-      // ── Render prompt / headers ──
-      function render() {
-        var idn = IDENTITIES[state.id];
+      function updateNav() {
+        var N = state.def.steps.length;
+        var btn = $("next-btn");
+        var showNext = state.stepIndex < N && stepSatisfied(state.stepIndex);
+        btn.style.display = showNext ? "" : "none";
+        btn.textContent = state.stepIndex + 1 >= N ? "Finish \u2713" : "Next step \u2192";
+      }
+
+      // ── Prompt / setup ──
+      function setupDef() {
+        state.def = DEF(state.id, state.mode);
+        state.slotAns = {};
+        state.def.steps.forEach(function (st) {
+          st.tokens.forEach(function (tk) { if (tk.slot) state.slotAns[tk.id] = tk.ans; });
+        });
+        state.stepIndex = 0;
+        state.placed = {};
+        state.selectedTile = null;
+
         var lead = $("prompt-lead");
         var expr = $("prompt-expr");
-        var note = $("board-note");
-
-        if (state.mode === "expand") {
-          lead.textContent = "Expand";
-          kx(expr, idn.factored);
-          note.textContent = "Work out each product, then place the matching tile in every cell.";
-        } else {
-          lead.textContent = "Factorize";
-          kx(expr, idn.expanded);
-          note.textContent = "Rebuild the four products that make this expression, then read off the factors.";
-        }
-
-        buildArea();
-
+        lead.textContent = state.mode === "expand" ? "Expand" : "Factorize";
+        kx(expr, state.def.lhs);
+        $("board-note").textContent = state.mode === "expand"
+          ? "Build every line of the expansion by dragging tiles into the slots, one step at a time."
+          : "Build every line of the factorization by dragging tiles into the slots, one step at a time.";
         $("bank-hint").textContent = TOUCH
-          ? "Tap a tile, then tap a cell. Tiles can be reused."
-          : "Drag a tile into a cell (or tap tile then cell). Tiles can be reused.";
+          ? "Tap a tile, then tap a slot. Tiles can be reused."
+          : "Drag a tile into a slot (or tap tile then slot). Tiles can be reused.";
 
-        CELL_KEYS.forEach(renderCell);
-        updateCheck();
-      }
-
-      function resetBoard() {
-        state.placed = { tl: null, tr: null, bl: null, br: null };
-        state.revealStage = 0;
-        clearTileSelection();
+        buildTiles();
+        renderFlow();
+        updateVerdict();
+        updateNav();
       }
 
       // ── Events ──
@@ -544,23 +596,27 @@
           document.querySelectorAll(".mode-btn").forEach(function (x) { x.classList.remove("active"); });
           b.classList.add("active");
           state.mode = b.dataset.mode;
-          resetBoard();
-          render();
+          setupDef();
         });
       });
-      $("combine-btn").addEventListener("click", function () {
-        var steps = stepsFor(state.id, state.mode);
-        if (state.revealStage < steps.rhs.length) { state.revealStage += 1; renderReveal(); }
+      $("next-btn").addEventListener("click", function () {
+        var N = state.def.steps.length;
+        if (state.stepIndex < N && stepSatisfied(state.stepIndex)) {
+          state.stepIndex += 1;
+          clearTileSelection();
+          afterChange();
+        }
       });
       $("reset-btn").addEventListener("click", function () {
-        resetBoard();
-        render();
+        state.stepIndex = 0;
+        state.placed = {};
+        clearTileSelection();
+        afterChange();
       });
 
       function boot() {
         buildChips();
-        buildTiles();
-        render();
+        setupDef();
       }
       if (window.katex) { boot(); }
       else { (function wait() { if (window.katex) boot(); else setTimeout(wait, 30); })(); }
