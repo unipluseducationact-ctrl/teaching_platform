@@ -43,6 +43,7 @@ a.card:hover {
 .cover.expansion { background: linear-gradient(135deg, #e4daf5 0%, #dde8f5 40%, #f0e8c8 100%); }
 .cover.cross { background: linear-gradient(135deg, #e6daf5 0%, #d8eef0 40%, #f5e9c4 100%); }
 .cover.cross-tool { background: linear-gradient(135deg, #dce8f5 0%, #e8dff5 45%, #f5ecd0 100%); }
+.cover.identities { background: linear-gradient(135deg, #d6ecf5 0%, #e0f2dc 45%, #f7edcb 100%); }
 .icon {
   width: 72px; height: 72px; display: grid; place-items: center;
   filter: drop-shadow(0 4px 10px rgba(0,0,0,.08));
