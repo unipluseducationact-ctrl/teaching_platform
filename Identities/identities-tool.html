@@ -245,18 +245,27 @@
         if (v.indexOf("b^2") !== -1) return "b";
         return "ab";
       }
-      function headColor(t) { return t.replace("-", "") === "a" ? "a" : "b"; }
       function paren(t) { return t.charAt(0) === "-" ? "(" + t + ")" : t; }
 
-      function rawSum(cells) {
-        var out = "";
-        for (var i = 0; i < CELL_KEYS.length; i++) {
-          var t = cells[CELL_KEYS[i]];
-          if (i === 0) { out += t; }
-          else if (t.charAt(0) === "-") { out += " - " + t.slice(1); }
-          else { out += " + " + t; }
-        }
-        return out;
+      var HL = "#2E7D32";
+      function c(t) { return "\\textcolor{" + HL + "}{" + t + "}"; }
+
+      function stepsFor(id, mode) {
+        var S = {
+          "sq-sum": {
+            expand: { lhs: "(a+b)^2", rhs: ["(a+b)(a+b)", "a(a+b)+b(a+b)", "a^2+" + c("ab") + "+" + c("ab") + "+b^2", "a^2+" + c("2ab") + "+b^2"] },
+            factor: { lhs: "a^2+2ab+b^2", rhs: ["a^2+" + c("ab") + "+" + c("ab") + "+b^2", "a(a+b)+b(a+b)", "(a+b)(a+b)", "(a+b)^2"] }
+          },
+          "sq-diff": {
+            expand: { lhs: "(a-b)^2", rhs: ["(a-b)(a-b)", "a(a-b)-b(a-b)", "a^2-" + c("ab") + "-" + c("ab") + "+b^2", "a^2-" + c("2ab") + "+b^2"] },
+            factor: { lhs: "a^2-2ab+b^2", rhs: ["a^2-" + c("ab") + "-" + c("ab") + "+b^2", "a(a-b)-b(a-b)", "(a-b)(a-b)", "(a-b)^2"] }
+          },
+          "diff-sq": {
+            expand: { lhs: "(a+b)(a-b)", rhs: ["a(a-b)+b(a-b)", "a^2-" + c("ab") + "+" + c("ab") + "-b^2", "a^2-b^2"] },
+            factor: { lhs: "a^2-b^2", rhs: ["a^2-" + c("ab") + "+" + c("ab") + "-b^2", "a(a-b)+b(a-b)", "(a+b)(a-b)"] }
+          }
+        };
+        return S[id][mode === "expand" ? "expand" : "factor"];
       }
 
       var chipsEl = $("identity-chips");
@@ -460,7 +469,6 @@
       }
 
       function renderReveal() {
-        var idn = IDENTITIES[state.id];
         var reveal = $("reveal");
         var label = $("reveal-label");
         var line = $("reveal-line");
@@ -472,22 +480,12 @@
         }
         reveal.classList.add("show");
 
-        var raw = rawSum(idn.cells);
-        if (state.mode === "expand") {
-          label.textContent = "Expansion";
-          var rhs = [raw];
-          if (state.revealStage >= 2) rhs.push(idn.expanded);
-          kx(line, alignedTex(idn.factored, rhs), true);
-          btn.textContent = "Combine like terms →";
-          btn.style.display = state.revealStage >= 2 ? "none" : "";
-        } else {
-          label.textContent = "Factorization";
-          var rhsF = [raw];
-          if (state.revealStage >= 2) rhsF.push(idn.factored);
-          kx(line, alignedTex(idn.expanded, rhsF), true);
-          btn.textContent = "Read off the factors →";
-          btn.style.display = state.revealStage >= 2 ? "none" : "";
-        }
+        label.textContent = state.mode === "expand" ? "Expansion" : "Factorization";
+        var steps = stepsFor(state.id, state.mode);
+        var shown = Math.min(state.revealStage, steps.rhs.length);
+        kx(line, alignedTex(steps.lhs, steps.rhs.slice(0, shown)), true);
+        btn.textContent = "Next step →";
+        btn.style.display = shown >= steps.rhs.length ? "none" : "";
       }
 
       // ── Render prompt / headers ──
@@ -534,7 +532,8 @@
         });
       });
       $("combine-btn").addEventListener("click", function () {
-        if (state.revealStage === 1) { state.revealStage = 2; renderReveal(); }
+        var steps = stepsFor(state.id, state.mode);
+        if (state.revealStage < steps.rhs.length) { state.revealStage += 1; renderReveal(); }
       });
       $("reset-btn").addEventListener("click", function () {
         resetBoard();
