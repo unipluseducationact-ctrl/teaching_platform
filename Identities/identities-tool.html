@@ -366,6 +366,11 @@
             if (tk.slot && !tk.sign && !seen[tk.ans]) { seen[tk.ans] = 1; out.push(tk.ans); }
           });
         });
+        // Always offer both brackets as options (distractors) so the answer
+        // can't be guessed just from what's available.
+        ["(a+b)", "(a-b)"].forEach(function (v) {
+          if (!seen[v]) { seen[v] = 1; out.push(v); }
+        });
         return out;
       }
       function clearTileSelection() {
