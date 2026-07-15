@@ -286,7 +286,7 @@
               { label: "Write as a product", tokens: [S("p1", "(a+b)"), S("p2", "(a+b)")] },
               { label: "Expand each bracket", tokens: [S("g1a", "a"), S("g1b", "(a+b)"), SGN("sg", "+"), S("g2a", "b"), S("g2b", "(a+b)")] },
               { label: AREA, tokens: A },
-              { label: "Combine like terms", tokens: [F("a^2"), SGN("sm", "+"), S("m", "2ab"), F("+"), F("b^2")] }
+              { label: "Combine like terms", tokens: [F("a^2"), SGN("sm1", "+"), S("m", "2ab"), SGN("sm2", "+"), F("b^2")] }
             ]
           };
           if (id === "sq-diff") return {
@@ -295,7 +295,7 @@
               { label: "Write as a product", tokens: [S("p1", "(a-b)"), S("p2", "(a-b)")] },
               { label: "Expand each bracket", tokens: [S("g1a", "a"), S("g1b", "(a-b)"), SGN("sg", "-"), S("g2a", "b"), S("g2b", "(a-b)")] },
               { label: AREA, tokens: A },
-              { label: "Combine like terms", tokens: [F("a^2"), SGN("sm", "-"), S("m", "2ab"), F("+"), F("b^2")] }
+              { label: "Combine like terms", tokens: [F("a^2"), SGN("sm1", "-"), S("m", "2ab"), SGN("sm2", "+"), F("b^2")] }
             ]
           };
           return {
