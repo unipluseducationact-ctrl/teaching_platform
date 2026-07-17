@@ -565,13 +565,22 @@ let fcIdx = 0;
 let fcFlipped = false;
 
 function renderCard(){
+  const cardEl = document.getElementById('fc-card');
+  const inner = document.getElementById('fc-inner');
+  // Snap back to front instantly before swapping content,
+  // so the next card's answer never flashes while still flipped.
+  if (fcFlipped || cardEl.classList.contains('flipped')) {
+    inner.style.transition = 'none';
+    cardEl.classList.remove('flipped');
+    void inner.offsetWidth; // force reflow so the reset applies immediately
+    inner.style.transition = '';
+  }
+  fcFlipped = false;
   const card = FC_CARDS[fcOrder[fcIdx]];
   document.getElementById('fc-progress').textContent = `Card ${fcIdx+1} / ${FC_CARDS.length}`;
   document.getElementById('fc-category').textContent = card.cat;
   document.getElementById('fc-front').innerHTML = card.front;
   document.getElementById('fc-back').innerHTML = card.back;
-  fcFlipped = false;
-  document.getElementById('fc-card').classList.remove('flipped');
 }
 function flipCard(){
   fcFlipped = !fcFlipped;
