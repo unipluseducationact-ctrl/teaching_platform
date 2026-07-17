@@ -44,6 +44,8 @@ a.card:hover {
 .cover.cross { background: linear-gradient(135deg, #e6daf5 0%, #d8eef0 40%, #f5e9c4 100%); }
 .cover.cross-tool { background: linear-gradient(135deg, #dce8f5 0%, #e8dff5 45%, #f5ecd0 100%); }
 .cover.identities { background: linear-gradient(135deg, #d6ecf5 0%, #e0f2dc 45%, #f7edcb 100%); }
+.cover.general { background: linear-gradient(135deg, #dde5f0 0%, #e6f0e0 45%, #f7ead0 100%); }
+.cover.equation { background: linear-gradient(135deg, #e8dff5 0%, #dfe9f5 45%, #e2f2df 100%); }
 .icon {
   width: 72px; height: 72px; display: grid; place-items: center;
   filter: drop-shadow(0 4px 10px rgba(0,0,0,.08));

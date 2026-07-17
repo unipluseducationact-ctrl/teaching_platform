@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equation Flashcards — Algebraic Equation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f4f4f2; --panel: #ffffff; --panel2: #f7f7f5; --ink: #1a1a1a; --dim: #5c5c58;
+      --line: #e3e0d8;
+      --blue: #1976d2; --green: #2e7d32; --orange: #ef6c00; --purple: #6a4fa3;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; background: var(--bg); color: var(--ink);
+      font-family: "Hanken Grotesk", system-ui, sans-serif;
+    }
+    header {
+      padding: 18px 28px; border-bottom: 1px solid var(--line);
+      display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    }
+    header h1 { font-size: 22px; margin: 0; font-weight: 700; }
+    header .crumb { color: var(--dim); font-size: 13px; }
+    .back-platform {
+      display: inline-flex; align-items: center; gap: 4px; padding: 7px 12px;
+      border: 1px solid var(--line); border-radius: 999px; background: var(--panel);
+      color: var(--ink); text-decoration: none; font-size: 13px; font-weight: 600;
+    }
+    .back-platform:hover { border-color: var(--blue); color: var(--blue); }
+    main { padding: 20px 28px 48px; max-width: 1120px; margin: 0 auto; }
+
+    .card {
+      background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
+      padding: 18px 22px; margin-bottom: 20px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.06);
+    }
+    .card h2 { margin: 0 0 4px; font-size: 20px; }
+    .card .sub { margin: 0 0 14px; color: var(--dim); }
+    .math { font-family: "JetBrains Mono", monospace; font-weight: 700; }
+
+    /* ── flashcards ── */
+    .fc-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+    }
+    .fc {
+      perspective: 1100px; cursor: pointer; -webkit-tap-highlight-color: transparent;
+      min-height: 250px; outline: none;
+    }
+    .fc-inner {
+      position: relative; width: 100%; height: 100%; min-height: 250px;
+      transition: transform .55s cubic-bezier(.4, .1, .2, 1); transform-style: preserve-3d;
+    }
+    .fc.flipped .fc-inner { transform: rotateY(180deg); }
+    .fc:focus-visible .fc-inner { box-shadow: 0 0 0 3px var(--blue); border-radius: 16px; }
+    .fc-face {
+      position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+      border-radius: 16px; border: 2px solid var(--line);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 18px; text-align: center; gap: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,.05), 0 10px 24px rgba(0,0,0,.07);
+    }
+    .fc-front { background: linear-gradient(160deg, #fff, #f2f6fb); }
+    .fc-back { background: #fffdf6; transform: rotateY(180deg); justify-content: flex-start; padding-top: 16px; }
+    .fc-step {
+      font-size: 12px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase;
+      padding: 4px 12px; border-radius: 999px; color: #fff;
+    }
+    .fc-title { font-size: 34px; font-weight: 800; line-height: 1.3; }
+    .fc-back-title { font-size: 17px; font-weight: 800; line-height: 1.35; }
+    .fc-hint { font-size: 12px; color: var(--dim); margin-top: 6px; }
+    .fc-back .fc-step { margin-bottom: 2px; }
+    .fc-eg {
+      width: 100%; font-family: "JetBrains Mono", monospace; font-size: 16px; font-weight: 700;
+      display: flex; flex-direction: column; gap: 6px; align-items: center; margin-top: 4px;
+    }
+    .fc-eg .from { color: var(--ink); }
+    .fc-eg .arrow { color: var(--dim); font-family: "Hanken Grotesk", sans-serif; font-size: 13px; font-weight: 700; }
+    .fc-eg .to { color: var(--green); }
+    .fc-eg .hl { background: #fff3c4; border-radius: 4px; padding: 0 3px; }
+    .fc-note { font-size: 13px; color: var(--dim); line-height: 1.5; margin-top: auto; }
+
+    /* colour accents per part */
+    .part-solve .fc-step { background: var(--blue); }
+    .part-solve .fc-front { border-color: #bbdefb; }
+    .part-word .fc-step { background: var(--purple); }
+    .part-word .fc-front { border-color: #d1c4e9; }
+
+    /* ── worked example (details) ── */
+    details.worked { margin-top: 16px; border-top: 1px dashed var(--line); padding-top: 12px; }
+    details.worked summary {
+      cursor: pointer; font-weight: 700; color: var(--blue); list-style: none;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    details.worked summary::-webkit-details-marker { display: none; }
+    details.worked summary::before { content: "▸"; transition: transform .2s; }
+    details.worked[open] summary::before { transform: rotate(90deg); }
+    .worked-body { margin-top: 10px; line-height: 1.9; }
+    .worked-body .math { font-size: 16px; }
+    .worked-body .step-tag {
+      font-size: 11px; font-weight: 800; color: #fff; border-radius: 999px; padding: 2px 9px; margin-right: 8px;
+      vertical-align: 2px;
+    }
+    .part-solve .worked-body .step-tag { background: var(--blue); }
+    .part-word .worked-body .step-tag { background: var(--purple); }
+    .worked-body .ans { color: var(--green); }
+    .problem-box {
+      background: var(--panel2); border: 1px solid var(--line); border-radius: 10px;
+      padding: 10px 14px; margin: 8px 0 12px; line-height: 1.7;
+    }
+
+    .flip-all {
+      margin-left: auto; background: var(--panel); border: 2px solid var(--line); border-radius: 999px;
+      font: 800 13px "Hanken Grotesk", sans-serif; color: var(--ink); padding: 8px 14px; cursor: pointer;
+    }
+    .flip-all:hover { border-color: var(--blue); color: var(--blue); }
+    .part-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .part-head h2 { margin: 0; }
+    .part-head .sub { margin: 0; }
+
+    @media (max-width: 1100px) {
+      .fc-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 560px) {
+      .fc-grid { grid-template-columns: 1fr; }
+      .fc, .fc-inner { min-height: 220px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="back-platform" href="../levels/pre-s1.html">← Pre S1</a>
+    <h1>Equation Flashcards</h1>
+    <span class="crumb">Pre S1 Maths · L05–06 Algebraic Equation · Steps to solve &amp; set up equations</span>
+  </header>
+  <main>
+
+    <!-- ── Part 1: solving ── -->
+    <section class="card part-solve">
+      <div class="part-head">
+        <h2>Part 1 — Solving an equation</h2>
+        <p class="sub">Click each step to reveal what to do, with an example.</p>
+        <button class="flip-all" type="button" data-target="solve">Flip all</button>
+      </div>
+      <div class="fc-grid" id="grid-solve">
+
+        <div class="fc" tabindex="0" role="button" aria-label="Step 1: cancel the denominators">
+          <div class="fc-inner">
+            <div class="fc-face fc-front">
+              <span class="fc-title">Step 1</span>
+              <span class="fc-hint">Click to reveal</span>
+            </div>
+            <div class="fc-face fc-back">
+              <span class="fc-step">Step 1</span>
+              <span class="fc-back-title">Cancel the denominators</span>
+              <div class="fc-eg">
+                <span class="from"><span class="hl">(x + 1) / 2</span> = x − 2</span>
+                <span class="arrow">× 2 on both sides ↓</span>
+                <span class="to">x + 1 = 2(x − 2)</span>
+              </div>
+              <p class="fc-note">Multiply <b>both sides</b> by the denominator.<br>More than one fraction? Use the LCM first.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="fc" tabindex="0" role="button" aria-label="Step 2: expand the brackets">
+          <div class="fc-inner">
+            <div class="fc-face fc-front">
+              <span class="fc-title">Step 2</span>
+              <span class="fc-hint">Click to reveal</span>
+            </div>
+            <div class="fc-face fc-back">
+              <span class="fc-step">Step 2</span>
+              <span class="fc-back-title">Expand the brackets</span>
+              <div class="fc-eg">
+                <span class="from"><span class="hl">3(x − 10)</span> = 2x − 10</span>
+                <span class="arrow">expand ↓</span>
+                <span class="to">3x − 30 = 2x − 10</span>
+              </div>
+              <p class="fc-note">Multiply everything inside the bracket:<br>3 × x and 3 × (−10).</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="fc" tabindex="0" role="button" aria-label="Step 3: x terms on the left, constants on the right">
+          <div class="fc-inner">
+            <div class="fc-face fc-front">
+              <span class="fc-title">Step 3</span>
+              <span class="fc-hint">Click to reveal</span>
+            </div>
+            <div class="fc-face fc-back">
+              <span class="fc-step">Step 3</span>
+              <span class="fc-back-title">x-terms on the left,<br>constants on the right</span>
+              <div class="fc-eg">
+                <span class="from">2x <span class="hl">+ 1</span> = 7</span>
+                <span class="arrow">move it across (sign flips) ↓</span>
+                <span class="to">2x = 7 <span class="hl">− 1</span></span>
+              </div>
+              <p class="fc-note">Cross the "=" and the sign flips:<br>+ ↔ −, × ↔ ÷.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="fc" tabindex="0" role="button" aria-label="Step 4: combine like terms">
+          <div class="fc-inner">
+            <div class="fc-face fc-front">
+              <span class="fc-title">Step 4</span>
+              <span class="fc-hint">Click to reveal</span>
+            </div>
+            <div class="fc-face fc-back">
+              <span class="fc-step">Step 4</span>
+              <span class="fc-back-title">Combine like terms</span>
+              <div class="fc-eg">
+                <span class="from"><span class="hl">x − 2x</span> = −4 − 1</span>
+                <span class="arrow">combine ↓</span>
+                <span class="to">−x = −5</span>
+                <span class="to">x = 5</span>
+              </div>
+              <p class="fc-note">Simplify each side to get <b>ax = b</b>, then divide by the coefficient of x.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <details class="worked">
+        <summary>Full example — all 4 steps together</summary>
+        <div class="worked-body">
+          <div class="problem-box math">(x + 1) / 2 = x − 2</div>
+          <div><span class="step-tag">STEP 1</span><span class="math">x + 1 = 2(x − 2)</span> &nbsp;(× 2 on both sides)</div>
+          <div><span class="step-tag">STEP 2</span><span class="math">x + 1 = 2x − 4</span> &nbsp;(expand the bracket)</div>
+          <div><span class="step-tag">STEP 3</span><span class="math">x − 2x = −4 − 1</span> &nbsp;(x-terms left, constants right)</div>
+          <div><span class="step-tag">STEP 4</span><span class="math">−x = −5</span> &nbsp;(combine) → <span class="math ans">x = 5</span></div>
+        </div>
+      </details>
+    </section>
+
+    <!-- ── Part 2: word problems ── -->
+    <section class="card part-word">
+      <div class="part-head">
+        <h2>Part 2 — Word problems</h2>
+        <p class="sub">Click each step to reveal what to do, with an example.</p>
+        <button class="flip-all" type="button" data-target="word">Flip all</button>
+      </div>
+      <div class="fc-grid" id="grid-word">
+
+        <div class="fc" tabindex="0" role="button" aria-label="Step 1: decide what to let x be">
+          <div class="fc-inner">
+            <div class="fc-face fc-front">
+              <span class="fc-title">Step 1</span>
+              <span class="fc-hint">Click to reveal</span>
+            </div>
+            <div class="fc-face fc-back">
+              <span class="fc-step">Step 1</span>
+              <span class="fc-back-title">Decide what to "Let x be"</span>
+              <div class="fc-eg">
+                <span class="to">Let Charles be <span class="hl">x</span> years old now</span>
+              </div>
+              <p class="fc-note">Pick the quantity everything else is compared to — usually the <b>smallest / base</b> one.<br>Remember the units (years old, cm, …).</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="fc" tabindex="0" role="button" aria-label="Step 2: express the others in terms of x">
+          <div class="fc-inner">
+            <div class="fc-face fc-front">
+              <span class="fc-title">Step 2</span>
+              <span class="fc-hint">Click to reveal</span>
+            </div>
+            <div class="fc-face fc-back">
+              <span class="fc-step">Step 2</span>
+              <span class="fc-back-title">Express everything else in terms of x</span>
+              <div class="fc-eg">
+                <span class="from">"William is twice as old as Charles"</span>
+                <span class="arrow">so ↓</span>
+                <span class="to">William is <span class="hl">2x</span> years old now</span>
+              </div>
+              <p class="fc-note">Turn every other quantity into an expression with x — no new letters!</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="fc" tabindex="0" role="button" aria-label="Step 3: use the given information to form an equation">
+          <div class="fc-inner">
+            <div class="fc-face fc-front">
+              <span class="fc-title">Step 3</span>
+              <span class="fc-hint">Click to reveal</span>
+            </div>
+            <div class="fc-face fc-back">
+              <span class="fc-step">Step 3</span>
+              <span class="fc-back-title">Use the given information to form an equation</span>
+              <div class="fc-eg">
+                <span class="from">"10 years ago, William was 3 times as old as Charles"</span>
+                <span class="arrow">so ↓</span>
+                <span class="to">2x − 10 = <span class="hl">3(</span>x − 10<span class="hl">)</span></span>
+              </div>
+              <p class="fc-note">Find the sentence that says two things are <b>equal</b> — that sentence is your "=".</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="fc" tabindex="0" role="button" aria-label="Step 4: solve the equation using Part 1">
+          <div class="fc-inner">
+            <div class="fc-face fc-front">
+              <span class="fc-title">Step 4</span>
+              <span class="fc-hint">Click to reveal</span>
+            </div>
+            <div class="fc-face fc-back">
+              <span class="fc-step">Step 4</span>
+              <span class="fc-back-title">Solve it with Part 1's steps</span>
+              <div class="fc-eg">
+                <span class="from">2x − 10 = 3(x − 10)</span>
+                <span class="arrow">Part 1: Steps 1 → 4 ↓</span>
+                <span class="to"><span class="hl">x = 20</span></span>
+              </div>
+              <p class="fc-note">Clear fractions → expand → move terms → combine.<br>Then answer the original question (with units!).</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <details class="worked">
+        <summary>Full example — all 4 steps together</summary>
+        <div class="worked-body">
+          <div class="problem-box">
+            William is twice as old as Charles now. 10 years ago, William was 3 times as old as Charles.
+            How old are they now?
+          </div>
+          <div><span class="step-tag">STEP 1</span>Let Charles be <span class="math">x</span> years old now.</div>
+          <div><span class="step-tag">STEP 2</span>Then William is <span class="math">2x</span> years old now.
+            (10 years ago: Charles was <span class="math">x − 10</span>, William was <span class="math">2x − 10</span>.)</div>
+          <div><span class="step-tag">STEP 3</span><span class="math">2x − 10 = 3(x − 10)</span></div>
+          <div><span class="step-tag">STEP 4</span>Solve with Part 1:</div>
+          <div><span class="math">2x − 10 = 3x − 30</span> &nbsp;(expand the brackets)</div>
+          <div><span class="math">2x − 3x = −30 + 10</span> &nbsp;(x-terms left, constants right)</div>
+          <div><span class="math">−x = −20</span> &nbsp;(combine) → <span class="math ans">x = 20</span></div>
+          <div class="ans">∴ Charles is 20 years old and William is 40 years old now.</div>
+        </div>
+      </details>
+    </section>
+
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+
+      document.querySelectorAll(".fc").forEach(function (card) {
+        function flip() { card.classList.toggle("flipped"); }
+        card.addEventListener("click", flip);
+        card.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); }
+        });
+      });
+
+      document.querySelectorAll(".flip-all").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var cards = document.querySelectorAll("#grid-" + btn.dataset.target + " .fc");
+          var anyUnflipped = Array.prototype.some.call(cards, function (c) {
+            return !c.classList.contains("flipped");
+          });
+          cards.forEach(function (c) { c.classList.toggle("flipped", anyUnflipped); });
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
