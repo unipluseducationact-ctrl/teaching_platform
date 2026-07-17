@@ -10,8 +10,8 @@
   <script defer src="factorization-game.js"></script>
   <style>
     :root {
-      --bg: #0f172a; --panel: #16213a; --panel2: #1b2945; --ink: #e5e7eb; --dim: #94a3b8;
-      --a: #4FC3F7; --b: #FFD54F; --ab: #81C784; --line: #28365c;
+      --bg: #f4f4f2; --panel: #ffffff; --panel2: #f7f7f5; --ink: #1a1a1a; --dim: #5c5c58;
+      --a: #4FC3F7; --b: #FFD54F; --ab: #81C784; --line: #e3e0d8;
     }
     * { box-sizing: border-box; }
     body {
@@ -42,9 +42,9 @@
     .snake-wrap { max-width: 1120px; margin: 0 auto; }
     .snake-how {
       background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
-      padding: 14px 18px; margin-bottom: 14px; color: #cdd6e4; line-height: 1.55;
+      padding: 14px 18px; margin-bottom: 14px; color: #3d3d39; line-height: 1.55;
     }
-    .snake-how h3 { margin: 0 0 6px; color: var(--ab); font-size: 17px; }
+    .snake-how h3 { margin: 0 0 6px; color: #2e7d32; font-size: 17px; }
     .snake-hud { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-bottom: 12px; }
     .snake-stat {
       background: var(--panel); border: 1px solid var(--line); border-radius: 11px;
@@ -64,10 +64,10 @@
     .snake-btn:hover { filter: brightness(1.06); }
     .snake-play { display: grid; grid-template-columns: minmax(0, 1fr) 180px; gap: 16px; align-items: center; }
     @media (max-width: 840px) { .snake-play { grid-template-columns: 1fr; } .snake-pad { margin: 0 auto; } }
-    .snake-board-wrap { background: #07101f; border: 1px solid var(--line); border-radius: 16px; padding: 12px; }
+    .snake-board-wrap { background: #ffffff; border: 1px solid var(--line); border-radius: 16px; padding: 12px; box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.06); }
     #snake-board {
       width: min(100%, 760px); aspect-ratio: 1 / 1; max-height: 78vh; display: block; margin: 0 auto;
-      border-radius: 12px; background: radial-gradient(circle at 50% 0%, #142442, #07101f 62%);
+      border-radius: 12px; background: #fdfdfc;
     }
     .snake-prompt {
       margin: 0 0 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
@@ -75,8 +75,8 @@
       display: flex; align-items: center; justify-content: center;
     }
     .snake-msg { min-height: 24px; color: var(--dim); font-size: 14px; margin-left: auto; }
-    .snake-msg.ok { color: var(--ab); font-weight: 800; }
-    .snake-msg.bad { color: #E57373; font-weight: 800; }
+    .snake-msg.ok { color: #2e7d32; font-weight: 800; }
+    .snake-msg.bad { color: #c62828; font-weight: 800; }
     .snake-pad {
       display: grid; grid-template-columns: repeat(3, 56px); grid-template-rows: repeat(3, 56px); gap: 8px;
       justify-content: center; align-content: center; background: var(--panel); border: 1px solid var(--line);

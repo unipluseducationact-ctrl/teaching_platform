@@ -511,8 +511,8 @@
     const ctx = SN.ctx, W = SN.canvas.width, H = SN.canvas.height;
     SN.cell = W / SN.cols;
     ctx.clearRect(0, 0, W, H);
-    ctx.fillStyle = "#07101f"; ctx.fillRect(0, 0, W, H);
-    ctx.strokeStyle = "rgba(148,163,184,.12)";
+    ctx.fillStyle = "#fdfdfc"; ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = "rgba(26,26,26,.07)";
     for (let i = 0; i <= SN.cols; i++) { ctx.beginPath(); ctx.moveTo(i * SN.cell, 0); ctx.lineTo(i * SN.cell, H); ctx.stroke(); }
     for (let j = 0; j <= SN.rows; j++) { ctx.beginPath(); ctx.moveTo(0, j * SN.cell); ctx.lineTo(W, j * SN.cell); ctx.stroke(); }
     SN.foods.forEach((f) => {
@@ -526,7 +526,7 @@
       snakeDrawFoodText(ctx, f.type === "gcf" ? String(f.value) : plainExpr(f.tex), x, y, bw, bh);
     });
     SN.snake.forEach((p, i) => {
-      ctx.fillStyle = i === 0 ? "#fb923c" : "#fde047";
+      ctx.fillStyle = i === 0 ? "#f97316" : "#facc15";
       roundRect(ctx, p.x * SN.cell + 3, p.y * SN.cell + 3, SN.cell - 6, SN.cell - 6, 7, true, false);
     });
   }
