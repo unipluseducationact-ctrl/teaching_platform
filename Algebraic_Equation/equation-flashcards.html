@@ -209,11 +209,10 @@
       max-width: 680px; margin: 14px auto 0; font-size: 14px; line-height: 1.7; color: var(--dim);
       background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px;
     }
-    .balance.wobble .bal-beam { animation: balWobble .45s ease; }
-    @keyframes balWobble {
-      25% { transform: rotate(2.5deg); }
-      75% { transform: rotate(-2.5deg); }
-    }
+    /* wrong move → the heavier (locked) side sinks, then it recovers */
+    .balance.tip { --tilt: -5deg; }
+    .balance.tip .bal-hang.left { transform: rotate(calc(-1 * var(--tilt))) translateY(20px); }
+    .balance.tip .bal-hang.right { transform: rotate(calc(-1 * var(--tilt))) translateY(-20px); }
     @media (max-width: 700px) {
       .bal-beam { width: 92vw; margin-left: -46vw; }
       .bal-pan { width: 40vw; }
@@ -500,8 +499,9 @@
       /* ── Part 3: balance demo ── */
       var chipX = '<span class="chip x">x</span>';
       function chipW(n) { return '<span class="chip w">' + n + '</span>'; }
+      /* the rope only ties (x + 5); the 2 stays outside the bracket */
       var bundleHTML =
-        '<span class="bundle">' + chipW("2 ×") + chipX + chipW("+ 5") + "</span>";
+        chipW("2 ×") + '<span class="bundle">' + chipX + chipW("+ 5") + "</span>";
       var boxHTML =
         '<div class="boxwrap"><div class="boxrow">' + bundleHTML +
         '</div><span class="boxlabel">box: ÷ 7</span></div>';
@@ -549,6 +549,7 @@
         msgEl.className = "bal-msg " + (ok ? "good" : "bad");
       }
 
+      var tipTimer = null;
       function useTool(step) {
         if (stage >= STAGES.length - 1) return;
         if (step === stage) {
@@ -556,9 +557,9 @@
           render();
           say(DONE_MSG[step], true);
         } else {
-          balEl.classList.remove("wobble");
-          void balEl.offsetWidth;
-          balEl.classList.add("wobble");
+          balEl.classList.add("tip");
+          clearTimeout(tipTimer);
+          tipTimer = setTimeout(function () { balEl.classList.remove("tip"); }, 900);
           say(WRONG_MSG[step], false);
         }
       }
