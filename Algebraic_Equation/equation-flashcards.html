@@ -125,6 +125,99 @@
       .fc-grid { grid-template-columns: 1fr; }
       .fc, .fc-inner { min-height: 220px; }
     }
+
+    /* ── balance demo ── */
+    .part-balance .fc-step { background: var(--green); }
+    .bal-eq {
+      text-align: center; font-size: 22px; margin: 4px 0 2px;
+      font-family: "JetBrains Mono", monospace; font-weight: 700; min-height: 52px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .frac { display: inline-flex; flex-direction: column; text-align: center; vertical-align: middle; line-height: 1.25; }
+    .frac .num { border-bottom: 2px solid var(--ink); padding: 0 8px; }
+    .frac .den { padding: 0 8px; }
+    .bal-msg { min-height: 24px; text-align: center; font-weight: 700; font-size: 14px; margin: 6px 0; }
+    .bal-msg.bad { color: #c62828; }
+    .bal-msg.good { color: var(--green); }
+    .bal-eq .ans { color: var(--green); }
+
+    .balance-wrap { padding: 24px 0 4px; }
+    .balance { --tilt: 0deg; position: relative; height: 250px; max-width: 680px; margin: 0 auto; }
+    .bal-base {
+      position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
+      width: 170px; height: 12px; background: #8d8a80; border-radius: 6px;
+    }
+    .bal-pillar {
+      position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%);
+      width: 14px; height: 190px; background: #8d8a80; border-radius: 7px 7px 0 0;
+    }
+    .bal-beam {
+      position: absolute; left: 50%; top: 44px; width: 560px; height: 10px; margin-left: -280px;
+      background: #5c5a52; border-radius: 5px;
+      transform: rotate(var(--tilt)); transform-origin: center; transition: transform .5s ease;
+    }
+    .bal-pivot {
+      position: absolute; left: 50%; top: 39px; transform: translateX(-50%);
+      width: 20px; height: 20px; background: #5c5a52; border-radius: 50%; z-index: 2;
+    }
+    .bal-hang {
+      position: absolute; top: 10px; width: 0;
+      transform: rotate(calc(-1 * var(--tilt))); transform-origin: top center;
+      transition: transform .5s ease;
+    }
+    .bal-hang.left { left: 30px; }
+    .bal-hang.right { right: 30px; }
+    .bal-chain { width: 2px; height: 42px; background: #8d8a80; margin: 0 auto; }
+    .bal-pan {
+      width: 250px; min-height: 78px; transform: translateX(-50%); margin-left: 1px;
+      border: 2px solid var(--line); border-top-width: 4px; border-top-color: #8d8a80;
+      background: #fff; border-radius: 0 0 16px 16px;
+      display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; padding: 10px;
+      box-shadow: 0 6px 14px rgba(0,0,0,.08);
+    }
+    .chip {
+      font: 700 15px "JetBrains Mono", monospace; padding: 5px 10px; border-radius: 8px; border: 2px solid;
+    }
+    .chip.x { background: #e3f2fd; border-color: #1976d2; color: #0d47a1; }
+    .chip.w { background: #eceff1; border-color: #90a4ae; color: #37474f; }
+    .bundle {
+      display: inline-flex; align-items: center; gap: 4px; padding: 9px 8px 6px;
+      border: 3px dashed #a1887f; border-radius: 12px; background: #fff8f0; position: relative;
+    }
+    .bundle::after {
+      content: "🪢"; position: absolute; top: -13px; left: 50%; transform: translateX(-50%); font-size: 15px;
+    }
+    .boxwrap {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      padding: 12px 10px 6px; border: 4px solid #8d6e63; background: #efebe9; border-radius: 10px;
+    }
+    .boxwrap .boxrow { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+    .boxwrap .boxlabel { font: 800 12px "Hanken Grotesk", sans-serif; color: #5d4037; }
+
+    .bal-tools { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 18px; }
+    .tool {
+      cursor: grab; user-select: none; text-align: center;
+      padding: 10px 16px; border-radius: 12px; border: 2px solid var(--line); background: var(--panel);
+      box-shadow: 0 2px 6px rgba(0,0,0,.08);
+    }
+    .tool .t-main { display: block; font: 800 16px "JetBrains Mono", monospace; }
+    .tool .t-sub { display: block; font: 700 11px "Hanken Grotesk", sans-serif; color: var(--dim); margin-top: 2px; }
+    .tool:hover { border-color: var(--green); }
+    .tool[data-used="1"] { opacity: .35; cursor: default; }
+    .tool[data-used="1"]:hover { border-color: var(--line); }
+    .bal-story {
+      max-width: 680px; margin: 14px auto 0; font-size: 14px; line-height: 1.7; color: var(--dim);
+      background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px;
+    }
+    .balance.wobble .bal-beam { animation: balWobble .45s ease; }
+    @keyframes balWobble {
+      25% { transform: rotate(2.5deg); }
+      75% { transform: rotate(-2.5deg); }
+    }
+    @media (max-width: 700px) {
+      .bal-beam { width: 92vw; margin-left: -46vw; }
+      .bal-pan { width: 40vw; }
+    }
   </style>
 </head>
 <body>
@@ -340,6 +433,45 @@
       </details>
     </section>
 
+    <!-- ── Part 3: the balance ── -->
+    <section class="card part-balance">
+      <div class="part-head">
+        <h2>Part 3 — The Balance: why Step 1 → Step 2?</h2>
+        <p class="sub">Keep the scale level and find the "weight" of x. Drag (or click) a tool to use it.</p>
+        <button class="flip-all" type="button" id="bal-reset">Reset</button>
+      </div>
+
+      <div class="bal-eq" id="bal-eq"></div>
+      <div class="bal-msg" id="bal-msg"></div>
+
+      <div class="balance-wrap">
+        <div class="balance" id="balance">
+          <div class="bal-beam"></div>
+          <div class="bal-pivot"></div>
+          <div class="bal-hang left"><div class="bal-chain"></div><div class="bal-pan" id="pan-left"></div></div>
+          <div class="bal-hang right"><div class="bal-chain"></div><div class="bal-pan" id="pan-right"></div></div>
+          <div class="bal-pillar"></div>
+          <div class="bal-base"></div>
+        </div>
+      </div>
+
+      <div class="bal-tools" id="bal-tools">
+        <div class="tool" draggable="true" data-step="0"><span class="t-main">× 7</span><span class="t-sub">unpack the box — both sides</span></div>
+        <div class="tool" draggable="true" data-step="1"><span class="t-main">✂ cut</span><span class="t-sub">cut the rope — expand</span></div>
+        <div class="tool" draggable="true" data-step="2"><span class="t-main">− 10</span><span class="t-sub">take 10 off both sides</span></div>
+        <div class="tool" draggable="true" data-step="3"><span class="t-main">÷ 2</span><span class="t-sub">halve both sides</span></div>
+      </div>
+
+      <div class="bal-story">
+        <b>The box</b> — the fraction bar and its denominator are a <b>box</b> holding the whole numerator.
+        You cannot touch anything inside until the box is unpacked: that is why <b>Step 1 is
+        "cancel the denominators"</b> (× both sides by 7).<br>
+        <b>The rope</b> — a bracket is a <b>rope</b> tying things together, so the x cannot be pulled out alone.
+        Cut the rope first: that is why <b>Step 2 is "expand the brackets"</b>.
+        And whatever you do, do it to <b>both sides</b>, or the scale tips!
+      </div>
+    </section>
+
   </main>
 
   <script>
@@ -355,6 +487,7 @@
       });
 
       document.querySelectorAll(".flip-all").forEach(function (btn) {
+        if (!btn.dataset.target) return;
         btn.addEventListener("click", function () {
           var cards = document.querySelectorAll("#grid-" + btn.dataset.target + " .fc");
           var anyUnflipped = Array.prototype.some.call(cards, function (c) {
@@ -363,6 +496,94 @@
           cards.forEach(function (c) { c.classList.toggle("flipped", anyUnflipped); });
         });
       });
+
+      /* ── Part 3: balance demo ── */
+      var chipX = '<span class="chip x">x</span>';
+      function chipW(n) { return '<span class="chip w">' + n + '</span>'; }
+      var bundleHTML =
+        '<span class="bundle">' + chipW("2 ×") + chipX + chipW("+ 5") + "</span>";
+      var boxHTML =
+        '<div class="boxwrap"><div class="boxrow">' + bundleHTML +
+        '</div><span class="boxlabel">box: ÷ 7</span></div>';
+      function fracHTML(num, den) {
+        return '<span class="frac"><span class="num">' + num + '</span><span class="den">' + den + "</span></span>";
+      }
+
+      var STAGES = [
+        { eq: fracHTML("2(x + 5)", "7") + " = 4", left: boxHTML, right: chipW(4) },
+        { eq: "2(x + 5) = 28", left: bundleHTML, right: chipW(28) },
+        { eq: "2x + 10 = 28", left: chipX + chipX + chipW(10), right: chipW(28) },
+        { eq: "2x = 18", left: chipX + chipX, right: chipW(18) },
+        { eq: '<span class="ans">x = 9</span>', left: chipX, right: chipW(9) }
+      ];
+      var DONE_MSG = [
+        "Box unpacked! × 7 on BOTH sides keeps it level. (Step 1: cancel the denominator)",
+        "Rope cut! 2(x + 5) becomes 2x + 10. (Step 2: expand the bracket)",
+        "10 off each side — still level. (Step 3: move the constants)",
+        "Halve both sides… the weight of x is 9! 🎉"
+      ];
+      var WRONG_MSG = [
+        "The box is already unpacked!",
+        "That rope is INSIDE the box — unpack the box first! (Step 1 before Step 2)",
+        "The 10 is still tied up — you can't take it off yet.",
+        "Not yet — untie and clear things first, then divide at the end."
+      ];
+
+      var stage = 0;
+      var eqEl = document.getElementById("bal-eq");
+      var msgEl = document.getElementById("bal-msg");
+      var balEl = document.getElementById("balance");
+      var toolsEl = document.getElementById("bal-tools");
+
+      function render() {
+        eqEl.innerHTML = STAGES[stage].eq;
+        document.getElementById("pan-left").innerHTML = STAGES[stage].left;
+        document.getElementById("pan-right").innerHTML = STAGES[stage].right;
+        toolsEl.querySelectorAll(".tool").forEach(function (t) {
+          t.dataset.used = Number(t.dataset.step) < stage ? "1" : "";
+        });
+      }
+
+      function say(text, ok) {
+        msgEl.textContent = text;
+        msgEl.className = "bal-msg " + (ok ? "good" : "bad");
+      }
+
+      function useTool(step) {
+        if (stage >= STAGES.length - 1) return;
+        if (step === stage) {
+          stage += 1;
+          render();
+          say(DONE_MSG[step], true);
+        } else {
+          balEl.classList.remove("wobble");
+          void balEl.offsetWidth;
+          balEl.classList.add("wobble");
+          say(WRONG_MSG[step], false);
+        }
+      }
+
+      toolsEl.querySelectorAll(".tool").forEach(function (tool) {
+        tool.addEventListener("click", function () { useTool(Number(tool.dataset.step)); });
+        tool.addEventListener("dragstart", function (e) {
+          e.dataTransfer.setData("text/plain", tool.dataset.step);
+        });
+      });
+      balEl.addEventListener("dragover", function (e) { e.preventDefault(); });
+      balEl.addEventListener("drop", function (e) {
+        e.preventDefault();
+        var step = parseInt(e.dataTransfer.getData("text/plain"), 10);
+        if (!isNaN(step)) useTool(step);
+      });
+
+      document.getElementById("bal-reset").addEventListener("click", function () {
+        stage = 0;
+        render();
+        say("", true);
+        msgEl.className = "bal-msg";
+      });
+
+      render();
     })();
   </script>
 </body>
