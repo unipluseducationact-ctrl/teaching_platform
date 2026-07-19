@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop Maths — Profit, Loss &amp; Discount</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <style>
+    :root {
+      --bg: #f4f4f2; --panel: #ffffff; --panel2: #f7f7f5; --ink: #1a1a1a; --dim: #5c5c58;
+      --line: #e3e0d8;
+      --blue: #1976d2; --green: #2e7d32; --orange: #ef6c00; --purple: #6a4fa3; --red: #c62828;
+      --teal: #00796b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; background: var(--bg); color: var(--ink);
+      font-family: "Hanken Grotesk", system-ui, sans-serif;
+    }
+    header {
+      padding: 18px 28px; border-bottom: 1px solid var(--line);
+      display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    }
+    header h1 { font-size: 22px; margin: 0; font-weight: 700; }
+    header .crumb { color: var(--dim); font-size: 13px; }
+    .back-platform {
+      display: inline-flex; align-items: center; gap: 4px; padding: 7px 12px;
+      border: 1px solid var(--line); border-radius: 999px; background: var(--panel);
+      color: var(--ink); text-decoration: none; font-size: 13px; font-weight: 600;
+    }
+    .back-platform:hover { border-color: var(--blue); color: var(--blue); }
+    main { padding: 20px 28px 48px; max-width: 1120px; margin: 0 auto; }
+    .card {
+      background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
+      padding: 18px 22px; margin-bottom: 20px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.06);
+    }
+    .card h2 { margin: 0 0 4px; font-size: 20px; }
+    .card .sub { margin: 0 0 14px; color: var(--dim); }
+    .pill {
+      font-size: 11px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase;
+      padding: 3px 11px; border-radius: 999px; color: #fff; vertical-align: 3px; margin-right: 8px;
+    }
+    .p1 .pill { background: var(--teal); }
+    .p2 .pill { background: var(--purple); }
+    .p3 .pill { background: var(--orange); }
+    .keyline {
+      background: var(--panel2); border: 1px solid var(--line); border-radius: 10px;
+      padding: 10px 14px; margin: 10px 0 14px; line-height: 1.9; font-size: 15px;
+    }
+    .controls { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 12px 0; }
+    .controls label { font-weight: 700; font-size: 14px; }
+    .controls input[type=range] { width: 200px; accent-color: var(--teal); }
+    .controls input[type=number] {
+      width: 92px; padding: 6px 8px; border: 2px solid var(--line); border-radius: 8px;
+      font: 700 15px "JetBrains Mono", monospace; text-align: center;
+    }
+    .controls input[type=number]:focus { outline: none; border-color: var(--teal); }
+    .readout { font: 700 16px "JetBrains Mono", monospace; }
+
+    /* money journey bars */
+    .stage { margin: 18px 0 4px; display: grid; gap: 26px; }
+    .bar-row { display: grid; grid-template-columns: 130px 1fr; gap: 12px; align-items: center; }
+    .bar-row .lab { font-weight: 800; font-size: 14px; text-align: right; }
+    .bar-track { position: relative; height: 44px; }
+    .seg {
+      position: absolute; top: 0; bottom: 0; left: 0; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font: 800 14px "JetBrains Mono", monospace; color: #fff; overflow: hidden; white-space: nowrap;
+      transition: width .25s ease;
+    }
+    .seg.cost { background: var(--blue); }
+    .seg.marked { background: var(--purple); }
+    .seg.sell { background: var(--teal); }
+    .seg.ghost { background: transparent; border: 2px dashed #9e9e9e; color: #616161; }
+    .arrow-note {
+      position: absolute; top: -22px; left: 0; font: 700 12px "Hanken Grotesk", sans-serif; color: var(--dim);
+    }
+    .result-line { margin-top: 16px; font-size: 18px; }
+    .result-line .profit { color: var(--green); font-weight: 800; }
+    .result-line .loss { color: var(--red); font-weight: 800; }
+    .eqs { margin-top: 12px; display: grid; gap: 8px; font-size: 16px; }
+    .eqs .lhs { display: inline-block; min-width: 120px; font-weight: 800; }
+    .warn {
+      margin-top: 14px; font-size: 14px; line-height: 1.7; color: var(--dim);
+      background: #fff8e1; border: 1px solid #ffe082; border-radius: 10px; padding: 10px 14px;
+    }
+    .warn b { color: var(--red); }
+    .presets { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .presets button {
+      cursor: pointer; border: 2px solid var(--line); background: var(--panel); border-radius: 999px;
+      font: 700 13px "Hanken Grotesk", sans-serif; padding: 6px 12px;
+    }
+    .presets button:hover { border-color: var(--teal); color: var(--teal); }
+
+    /* which-base quiz */
+    .quiz { display: grid; gap: 14px; }
+    .qz { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .qz .qtext { font-weight: 700; min-width: 260px; }
+    .qz button {
+      cursor: pointer; border: 2px solid var(--line); background: var(--panel); border-radius: 999px;
+      font: 800 13px "Hanken Grotesk", sans-serif; padding: 7px 14px;
+    }
+    .qz button:hover { border-color: var(--purple); }
+    .qz button.right { border-color: var(--green); background: #e8f5e9; color: var(--green); }
+    .qz button.wrong { border-color: var(--red); background: #ffebee; color: var(--red); }
+    .qz .fb { font-weight: 800; font-size: 13px; }
+    .qz .fb.good { color: var(--green); }
+    .qz .fb.bad { color: var(--red); }
+
+    /* worked examples */
+    details.worked { border-top: 1px dashed var(--line); padding-top: 12px; margin-top: 12px; }
+    details.worked summary {
+      cursor: pointer; font-weight: 700; color: var(--orange); list-style: none;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    details.worked summary::-webkit-details-marker { display: none; }
+    details.worked summary::before { content: "▸"; transition: transform .2s; }
+    details.worked[open] summary::before { transform: rotate(90deg); }
+    .worked-body { margin-top: 10px; line-height: 2.1; font-size: 15.5px; }
+
+    @media (max-width: 720px) {
+      .bar-row { grid-template-columns: 1fr; }
+      .bar-row .lab { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="back-platform" href="../levels/pre-s1.html">← Pre S1</a>
+    <h1>Shop Maths — Profit, Loss &amp; Discount</h1>
+    <span class="crumb">Pre S1 Maths · L09 Percentage 3 · Cost, marked &amp; selling price</span>
+  </header>
+  <main>
+
+    <!-- ── Part 1: money journey ── -->
+    <section class="card p1">
+      <h2><span class="pill">Part 1</span>The money journey — cost → marked → selling</h2>
+      <p class="sub">A shop buys an item, marks the price up, then gives a discount. Drag and watch.</p>
+      <div class="keyline">
+        <span class="ktx">\text{Marked} = \text{Cost} \times (1 + \text{mark-up}\%)</span> &nbsp;·&nbsp;
+        <span class="ktx">\text{Selling} = \text{Marked} \times (1 - \text{discount}\%)</span> &nbsp;·&nbsp;
+        <span class="ktx">\text{Profit} = \text{Selling} - \text{Cost}</span>
+      </div>
+      <div class="controls">
+        <label for="cost">Cost $</label>
+        <input type="number" id="cost" value="1200" step="1">
+        <label for="markup">mark-up</label>
+        <input type="range" id="markup" min="0" max="120" value="60">
+        <span class="readout" id="markupRead">+60%</span>
+        <label for="disc">discount</label>
+        <input type="range" id="disc" min="0" max="80" value="12">
+        <span class="readout" id="discRead">−12%</span>
+      </div>
+      <div class="presets">
+        <button type="button" data-c="1200" data-m="60" data-d="12">Class example: 1200, +60%, −12%</button>
+        <button type="button" data-c="150" data-m="90" data-d="0">Buy 150 sell 285</button>
+        <button type="button" data-c="1000" data-m="20" data-d="40">Big discount → loss?</button>
+      </div>
+      <div class="stage">
+        <div class="bar-row">
+          <span class="lab">Cost price</span>
+          <div class="bar-track"><div class="seg cost" id="segCost"></div></div>
+        </div>
+        <div class="bar-row">
+          <span class="lab">Marked price</span>
+          <div class="bar-track">
+            <span class="arrow-note" id="noteMark"></span>
+            <div class="seg ghost" id="ghostMark"></div>
+            <div class="seg marked" id="segMark"></div>
+          </div>
+        </div>
+        <div class="bar-row">
+          <span class="lab">Selling price</span>
+          <div class="bar-track">
+            <span class="arrow-note" id="noteSell"></span>
+            <div class="seg ghost" id="ghostSell"></div>
+            <div class="seg sell" id="segSell"></div>
+          </div>
+        </div>
+      </div>
+      <div class="eqs">
+        <div><span class="lhs">Marked</span>= <span id="eqMark"></span></div>
+        <div><span class="lhs">Selling</span>= <span id="eqSell"></span></div>
+        <div><span class="lhs" id="plLabel">Profit</span>= <span id="eqPL"></span></div>
+      </div>
+      <div class="result-line" id="resultLine"></div>
+      <div class="warn">
+        <b>Watch the base!</b> Mark-up % and profit % are both percentages <b>of the cost price</b>;
+        discount % is a percentage <b>of the marked price</b>. Same number, different base → different dollars.
+      </div>
+    </section>
+
+    <!-- ── Part 2: which base quiz ── -->
+    <section class="card p2">
+      <h2><span class="pill">Part 2</span>Quick check — which price is the base?</h2>
+      <p class="sub">Every percentage needs a base (the 100%). Pick the right one.</p>
+      <div class="quiz">
+        <div class="qz" data-ans="cost">
+          <span class="qtext">Profit % is a percentage of…</span>
+          <button type="button" data-v="cost">Cost price</button>
+          <button type="button" data-v="marked">Marked price</button>
+          <button type="button" data-v="sell">Selling price</button>
+          <span class="fb"></span>
+        </div>
+        <div class="qz" data-ans="marked">
+          <span class="qtext">Discount % is a percentage of…</span>
+          <button type="button" data-v="cost">Cost price</button>
+          <button type="button" data-v="marked">Marked price</button>
+          <button type="button" data-v="sell">Selling price</button>
+          <span class="fb"></span>
+        </div>
+        <div class="qz" data-ans="cost">
+          <span class="qtext">Loss % is a percentage of…</span>
+          <button type="button" data-v="cost">Cost price</button>
+          <button type="button" data-v="marked">Marked price</button>
+          <button type="button" data-v="sell">Selling price</button>
+          <span class="fb"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Part 3: worked examples ── -->
+    <section class="card p3">
+      <h2><span class="pill">Part 3</span>Worked examples from class</h2>
+      <details class="worked" open>
+        <summary>Profit % — buy at $150, sell at $285</summary>
+        <div class="worked-body">
+          <div class="ktx-block">\text{Profit} = 285 - 150 = \$135</div>
+          <div class="ktx-block">\text{Profit}\% = \frac{135}{150} \times 100\% = 90\%</div>
+        </div>
+      </details>
+      <details class="worked">
+        <summary>Loss % — cost $1650, sold for $990</summary>
+        <div class="worked-body">
+          <div class="ktx-block">\text{Loss} = 1650 - 990 = \$660</div>
+          <div class="ktx-block">\text{Loss}\% = \frac{660}{1650} \times 100\% = 40\%</div>
+        </div>
+      </details>
+      <details class="worked">
+        <summary>Discount % — marked $680, sold for $476</summary>
+        <div class="worked-body">
+          <div class="ktx-block">\text{Discount} = 680 - 476 = \$204</div>
+          <div class="ktx-block">\text{Discount}\% = \frac{204}{680} \times 100\% = 30\%</div>
+        </div>
+      </details>
+      <details class="worked">
+        <summary>Full journey — cost $1200, mark-up 60%, then sold at 88% of marked price</summary>
+        <div class="worked-body">
+          <div class="ktx-block">\text{Marked} = 1200 \times (1 + 60\%) = 1200 \times 1.6 = \$1920</div>
+          <div class="ktx-block">\text{Selling} = 1920 \times 88\% = 1920 \times 0.88 = \$1689.6</div>
+          <div class="ktx-block">\text{Profit} = 1689.6 - 1200 = \$489.6 \,,\quad
+            \text{Profit}\% = \frac{489.6}{1200} \times 100\% = 40.8\%</div>
+        </div>
+      </details>
+    </section>
+
+  </main>
+  <script>
+    "use strict";
+    const $ = id => document.getElementById(id);
+    const fmt = n => String(Math.round(n * 100) / 100);
+    const tex = (el, src) => katex.render(src, el, { throwOnError: false });
+    document.querySelectorAll(".ktx").forEach(el => tex(el, el.textContent));
+    document.querySelectorAll(".ktx-block").forEach(el => tex(el, el.textContent));
+
+    /* ── Part 1 ── */
+    function render() {
+      const c = parseFloat($("cost").value) || 0;
+      const m = +$("markup").value, d = +$("disc").value;
+      $("markupRead").textContent = "+" + m + "%";
+      $("discRead").textContent = "−" + d + "%";
+      const marked = c * (1 + m / 100);
+      const sell = marked * (1 - d / 100);
+      const mx = Math.max(c, marked, sell) || 1;
+      const w = v => (v / mx * 100) + "%";
+      $("segCost").style.width = w(c);
+      $("segCost").textContent = "$" + fmt(c);
+      $("ghostMark").style.width = w(c);
+      $("segMark").style.width = w(marked);
+      $("segMark").textContent = "$" + fmt(marked);
+      $("noteMark").textContent = "+" + m + "% of cost ($" + fmt(c) + ")";
+      $("ghostSell").style.width = w(marked);
+      $("segSell").style.width = w(sell);
+      $("segSell").textContent = "$" + fmt(sell);
+      $("noteSell").textContent = "−" + d + "% of marked ($" + fmt(marked) + ")  — not of cost!";
+      tex($("eqMark"), fmt(c) + " \\times (1 + " + m + "\\%) = " + fmt(marked));
+      tex($("eqSell"), fmt(marked) + " \\times (1 - " + d + "\\%) = " + fmt(sell));
+      const pl = sell - c;
+      const isProfit = pl >= 0;
+      $("plLabel").textContent = isProfit ? "Profit" : "Loss";
+      $("plLabel").style.color = isProfit ? "var(--green)" : "var(--red)";
+      const plPct = c ? Math.abs(pl) / c * 100 : 0;
+      tex($("eqPL"), fmt(sell) + " - " + fmt(c) + " = " + (isProfit ? "" : "-") + fmt(Math.abs(pl)));
+      const word = isProfit ? "profit" : "loss";
+      $("resultLine").innerHTML =
+        'The shop makes a <span class="' + word + '">' + word + " of $" + fmt(Math.abs(pl)) +
+        "</span> → " + word + " % = " + fmt(Math.abs(pl)) + " ÷ " + fmt(c) +
+        ' × 100% = <span class="' + word + '">' + fmt(plPct) + "%</span> (base = cost).";
+    }
+    ["cost", "markup", "disc"].forEach(id => $(id).addEventListener("input", render));
+    document.querySelectorAll(".presets button").forEach(b => {
+      b.addEventListener("click", () => {
+        $("cost").value = b.dataset.c;
+        $("markup").value = b.dataset.m;
+        $("disc").value = b.dataset.d;
+        render();
+      });
+    });
+    render();
+
+    /* ── Part 2 ── */
+    document.querySelectorAll(".qz").forEach(qz => {
+      const fb = qz.querySelector(".fb");
+      qz.querySelectorAll("button").forEach(b => {
+        b.addEventListener("click", () => {
+          qz.querySelectorAll("button").forEach(x => x.classList.remove("right", "wrong"));
+          const ok = b.dataset.v === qz.dataset.ans;
+          b.classList.add(ok ? "right" : "wrong");
+          fb.textContent = ok ? "✓ Correct" : "✗ Try again";
+          fb.className = "fb " + (ok ? "good" : "bad");
+        });
+      });
+    });
+  </script>
+</body>
+</html>

@@ -47,6 +47,7 @@ a.card:hover {
 .cover.general { background: linear-gradient(135deg, #dde5f0 0%, #e6f0e0 45%, #f7ead0 100%); }
 .cover.equation { background: linear-gradient(135deg, #e8dff5 0%, #dfe9f5 45%, #e2f2df 100%); }
 .cover.percentage { background: linear-gradient(135deg, #ffe8d1 0%, #f5f0d8 45%, #ddefd8 100%); }
+.cover.shop { background: linear-gradient(135deg, #d5ece8 0%, #eaf2d9 45%, #fdeccc 100%); }
 .icon {
   width: 72px; height: 72px; display: grid; place-items: center;
   filter: drop-shadow(0 4px 10px rgba(0,0,0,.08));

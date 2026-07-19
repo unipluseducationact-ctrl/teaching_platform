@@ -48,6 +48,8 @@
     .p2 .pill { background: var(--purple); }
     .p3 .pill { background: var(--green); }
     .p4 .pill { background: var(--orange); }
+    .p5 .pill { background: var(--red); }
+    .p6 .pill { background: #00796b; }
 
     .keyline {
       background: var(--panel2); border: 1px solid var(--line); border-radius: 10px;
@@ -150,7 +152,7 @@
     .seg.inc { background: var(--orange); }
     .seg.new { left: 0; background: var(--green); }
     .seg.ghost {
-      background: transparent; border: 2px dashed #1976d2aa; color: #1976d2;
+      background: transparent; border: 2px dashed #1976d2aa; color: #1976d2; overflow: visible;
     }
     .more-eqs {
       margin-top: 14px; display: grid; gap: 8px; font-size: 16px;
@@ -165,7 +167,51 @@
     }
     .warn b { color: var(--red); }
 
+    /* ── part 5: base trap ── */
+    .guess-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 12px 0; }
+    .guess-row .q { font-weight: 800; font-size: 15px; }
+    .guess-btn {
+      cursor: pointer; border: 2px solid var(--line); background: var(--panel); border-radius: 999px;
+      font: 800 14px "Hanken Grotesk", sans-serif; padding: 8px 16px;
+    }
+    .guess-btn:hover { border-color: var(--red); }
+    .guess-btn.picked-right { border-color: var(--green); background: #e8f5e9; color: var(--green); }
+    .guess-btn.picked-wrong { border-color: var(--red); background: #ffebee; color: var(--red); }
+    .guess-msg { font-weight: 800; font-size: 14px; }
+    .guess-msg.good { color: var(--green); }
+    .guess-msg.bad { color: var(--red); }
+    .trap-reveal.hidden { display: none; }
+    .seg.v1 { left: 0; background: #00897b; }
+    .seg.v2 { left: 0; background: var(--red); }
+    .base-tag {
+      position: absolute; right: 6px; top: -20px; font: 700 11px "Hanken Grotesk", sans-serif;
+      color: var(--dim); white-space: nowrap;
+    }
+    .trap-eqs { margin-top: 14px; display: grid; gap: 8px; font-size: 16px; }
+    .trap-eqs .note-base { font: 700 12px "Hanken Grotesk", sans-serif; color: var(--red); margin-left: 10px; }
+    .verdict { margin-top: 10px; font-size: 16px; font-weight: 800; }
+    .verdict .no { color: var(--red); }
+    .verdict .yes { color: var(--green); }
+
+    /* ── part 6: reverse ── */
+    .rev-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+    .rev-card { border: 2px solid var(--line); border-radius: 14px; padding: 14px 16px; }
+    .rev-card.wrong { border-color: #ef9a9a; background: #fff5f5; }
+    .rev-card.right { border-color: #a5d6a7; background: #f4fbf4; }
+    .rev-card .rc-head { font-weight: 800; font-size: 15px; margin-bottom: 8px; }
+    .rev-card.wrong .rc-head { color: var(--red); }
+    .rev-card.right .rc-head { color: var(--green); }
+    .rev-card .rc-eq { font-size: 16px; margin-bottom: 8px; }
+    .rev-card .rc-check { font-size: 14px; color: var(--dim); }
+    .rev-bars { margin-top: 16px; display: grid; gap: 18px; }
+    select.rev-sel {
+      padding: 7px 10px; border: 2px solid var(--line); border-radius: 8px; background: var(--panel);
+      font: 700 14px "Hanken Grotesk", sans-serif;
+    }
+    select.rev-sel:focus { outline: none; border-color: #00796b; }
+
     @media (max-width: 720px) {
+      .rev-grid { grid-template-columns: 1fr; }
       .conv-grid { grid-template-columns: 1fr; }
       .conv-arrows { transform: rotate(90deg); }
       .bar-row { grid-template-columns: 1fr; }
@@ -177,7 +223,7 @@
   <header>
     <a class="back-platform" href="../levels/pre-s1.html">← Pre S1</a>
     <h1>Percentage Playground</h1>
-    <span class="crumb">Pre S1 Maths · L07–09 Percentage · What % means, conversions, y% of x, y% more than x</span>
+    <span class="crumb">Pre S1 Maths · L07–09 Percentage · What % means, conversions, y% of x, change chains &amp; reverse</span>
   </header>
   <main>
 
@@ -310,6 +356,114 @@
         "12% more than 1200" → increase <span class="ktx">1200 \times 12\% = 144</span>,
         new value <span class="ktx">1200 \times 1.12 = 1344</span>.
       </div>
+    </section>
+
+    <!-- ── Part 5: the base trap ── -->
+    <section class="card p5">
+      <h2><span class="pill">Part 5</span>The base trap — up 20%, then down 20%</h2>
+      <p class="sub">A price rises 20%, then falls 20%. Is it back where it started?</p>
+      <div class="controls">
+        <label for="trapStart">Start $</label>
+        <input type="number" id="trapStart" value="100" step="1">
+        <label for="trapP1">1st change</label>
+        <input type="range" id="trapP1" min="-50" max="100" value="20">
+        <span class="readout" id="trapP1Read">+20%</span>
+        <label for="trapP2">2nd change</label>
+        <input type="range" id="trapP2" min="-50" max="100" value="-20">
+        <span class="readout" id="trapP2Read">−20%</span>
+      </div>
+      <div class="presets">
+        <button type="button" id="preTrap1">$100: +20% then −20%</button>
+        <button type="button" id="preTrap2">72000 visitors: −10% then −10%</button>
+      </div>
+      <div class="guess-row">
+        <span class="q">Your guess — the final value is:</span>
+        <button class="guess-btn" type="button" data-g="higher">Higher</button>
+        <button class="guess-btn" type="button" data-g="same">Back to the start</button>
+        <button class="guess-btn" type="button" data-g="lower">Lower</button>
+        <span class="guess-msg" id="trapMsg"></span>
+      </div>
+      <div class="trap-reveal hidden" id="trapReveal">
+        <div class="more-stage">
+          <div class="bar-row">
+            <span class="lab">Start</span>
+            <div class="bar-track"><div class="seg orig" id="trapSeg0"></div></div>
+          </div>
+          <div class="bar-row">
+            <span class="lab">After 1st</span>
+            <div class="bar-track">
+              <div class="seg ghost" id="trapGhost1"><span class="base-tag" id="trapBase1"></span></div>
+              <div class="seg v1" id="trapSeg1"></div>
+            </div>
+          </div>
+          <div class="bar-row">
+            <span class="lab">After 2nd</span>
+            <div class="bar-track">
+              <div class="seg ghost" id="trapGhost2"><span class="base-tag" id="trapBase2"></span></div>
+              <div class="seg v2" id="trapSeg2"></div>
+            </div>
+          </div>
+        </div>
+        <div class="trap-eqs">
+          <div><span id="eqTrap1"></span></div>
+          <div><span id="eqTrap2"></span><span class="note-base" id="trapBaseNote"></span></div>
+          <div><span id="eqTrap3"></span></div>
+        </div>
+        <div class="verdict" id="trapVerdict"></div>
+        <div class="warn">
+          The second percentage is measured on a <b>new base</b> — whatever the value is
+          <i>after</i> the first change. Same %, different base → different amount.
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Part 6: reverse percentage ── -->
+    <section class="card p6">
+      <h2><span class="pill">Part 6</span>Reverse — find the original value</h2>
+      <div class="keyline">
+        You know the <b>new</b> value and the % change; you want the <b>original</b>.
+        Since <span class="ktx">\text{New} = \text{Original} \times (1 \pm y\%)</span>,
+        undo it with <b>division</b>:
+        <span class="ktx">\text{Original} = \text{New} \div (1 \pm y\%)</span>.
+        Never multiply the new value by the percentage!
+      </div>
+      <div class="controls">
+        <label for="revNew">New value $</label>
+        <input type="number" id="revNew" value="250000" step="1">
+        <select id="revDir" class="rev-sel" aria-label="direction of change">
+          <option value="dec" selected>is a DECREASE of</option>
+          <option value="inc">is an INCREASE of</option>
+        </select>
+        <input type="range" id="revY" min="1" max="90" value="20">
+        <span class="readout" id="revYRead">20%</span>
+        <span style="font-weight:700; font-size:14px;">from the original</span>
+      </div>
+      <div class="rev-grid">
+        <div class="rev-card wrong">
+          <div class="rc-head">✗ Tempting but wrong</div>
+          <div class="rc-eq" id="revWrongEq"></div>
+          <div class="rc-check" id="revWrongCheck"></div>
+        </div>
+        <div class="rev-card right">
+          <div class="rc-head">✓ Undo with division</div>
+          <div class="rc-eq" id="revRightEq"></div>
+          <div class="rc-check" id="revRightCheck"></div>
+        </div>
+      </div>
+      <div class="rev-bars">
+        <div class="bar-row">
+          <span class="lab">Original ?</span>
+          <div class="bar-track"><div class="seg ghost" id="revSegOrig"></div></div>
+        </div>
+        <div class="bar-row">
+          <span class="lab">New</span>
+          <div class="bar-track"><div class="seg new" id="revSegNew"></div></div>
+        </div>
+      </div>
+      <p class="of-note" style="margin-top:12px">Example from class: a car costs $250000 this year,
+        which is 20% less than last year. Last year =
+        <span class="ktx">250000 \div 0.8 = 312500</span> — not
+        <span class="ktx">250000 \times 1.2 = 300000</span>.</p>
     </section>
 
   </main>
@@ -454,6 +608,94 @@
     $("moreX").addEventListener("input", renderMore);
     $("moreY").addEventListener("input", renderMore);
     renderMore();
+
+    /* ── Part 5 ── */
+    const signed = p => (p >= 0 ? "+" : "−") + Math.abs(p) + "%";
+    const factorTex = p => "(1 " + (p >= 0 ? "+" : "-") + " " + Math.abs(p) + "\\%)";
+    function renderTrap() {
+      const s = parseFloat($("trapStart").value) || 0;
+      const p1 = +$("trapP1").value, p2 = +$("trapP2").value;
+      $("trapP1Read").textContent = signed(p1);
+      $("trapP2Read").textContent = signed(p2);
+      const v1 = s * (1 + p1 / 100), v2 = v1 * (1 + p2 / 100);
+      const mx = Math.max(s, v1, v2) || 1;
+      const w = v => (v / mx * 100) + "%";
+      $("trapSeg0").style.width = w(s);
+      $("trapSeg0").textContent = fmt(s);
+      $("trapGhost1").style.width = w(s);
+      $("trapBase1").textContent = "base = " + fmt(s);
+      $("trapSeg1").style.width = w(v1);
+      $("trapSeg1").textContent = fmt(v1);
+      $("trapGhost2").style.width = w(v1);
+      $("trapBase2").textContent = "base = " + fmt(v1) + " (not " + fmt(s) + "!)";
+      $("trapSeg2").style.width = w(v2);
+      $("trapSeg2").textContent = fmt(v2);
+      tex($("eqTrap1"), fmt(s) + " \\times " + factorTex(p1) + " = " + fmt(v1));
+      tex($("eqTrap2"), fmt(v1) + " \\times " + factorTex(p2) + " = " + fmt(v2));
+      $("trapBaseNote").textContent = "the " + Math.abs(p2) + "% here is " +
+        Math.abs(p2) + "% of " + fmt(v1) + ", not of " + fmt(s);
+      const f = (1 + p1 / 100) * (1 + p2 / 100);
+      const overall = Math.round((f - 1) * 10000) / 100;
+      tex($("eqTrap3"), "\\text{Overall: } " + factorTex(p1) + " \\times " + factorTex(p2) +
+        " = " + fmt(f) + " \\;\\Rightarrow\\; " + (overall >= 0 ? "+" : "") + fmt(overall) + "\\%");
+      const v = $("trapVerdict");
+      if (Math.abs(v2 - s) < 1e-9) {
+        v.innerHTML = 'Final = start — <span class="yes">exactly back to ' + fmt(s) + "</span>.";
+      } else {
+        v.innerHTML = "Final " + fmt(v2) + " ≠ start " + fmt(s) +
+          ' — <span class="no">' + (v2 < s ? "lower" : "higher") + " by " +
+          fmt(Math.abs(v2 - s)) + "</span>.";
+      }
+      return { s, v2 };
+    }
+    function trapAnswer() {
+      const { s, v2 } = renderTrap();
+      return Math.abs(v2 - s) < 1e-9 ? "same" : (v2 < s ? "lower" : "higher");
+    }
+    document.querySelectorAll(".guess-btn").forEach(b => {
+      b.addEventListener("click", () => {
+        const ok = b.dataset.g === trapAnswer();
+        document.querySelectorAll(".guess-btn").forEach(x => x.classList.remove("picked-right", "picked-wrong"));
+        b.classList.add(ok ? "picked-right" : "picked-wrong");
+        const m = $("trapMsg");
+        m.textContent = ok ? "Correct!" : "Not quite — see why below.";
+        m.className = "guess-msg " + (ok ? "good" : "bad");
+        $("trapReveal").classList.remove("hidden");
+      });
+    });
+    ["trapStart", "trapP1", "trapP2"].forEach(id => $(id).addEventListener("input", renderTrap));
+    $("preTrap1").addEventListener("click", () => {
+      $("trapStart").value = 100; $("trapP1").value = 20; $("trapP2").value = -20; renderTrap();
+    });
+    $("preTrap2").addEventListener("click", () => {
+      $("trapStart").value = 72000; $("trapP1").value = -10; $("trapP2").value = -10; renderTrap();
+    });
+    renderTrap();
+
+    /* ── Part 6 ── */
+    function renderRev() {
+      const nv = parseFloat($("revNew").value) || 0;
+      const dec = $("revDir").value === "dec";
+      const y = +$("revY").value;
+      $("revYRead").textContent = y + "%";
+      const f = dec ? 1 - y / 100 : 1 + y / 100;       // New = Original × f
+      const wrongF = dec ? 1 + y / 100 : 1 - y / 100;  // the tempting mistake
+      const right = nv / f, wrong = nv * wrongF;
+      const fT = factorTex(dec ? -y : y), wrongFT = factorTex(dec ? y : -y);
+      tex($("revWrongEq"), fmt(nv) + " \\times " + wrongFT + " = " + fmt(wrong));
+      tex($("revWrongCheck"), "\\text{Check: } " + fmt(wrong) + " \\times " + fT +
+        " = " + fmt(wrong * f) + " \\neq " + fmt(nv));
+      tex($("revRightEq"), fmt(nv) + " \\div " + fT + " = " + fmt(right));
+      tex($("revRightCheck"), "\\text{Check: } " + fmt(right) + " \\times " + fT +
+        " = " + fmt(nv) + " \\; ✓");
+      const mx = Math.max(nv, right) || 1;
+      $("revSegOrig").style.width = (right / mx * 100) + "%";
+      $("revSegOrig").textContent = "Original = " + fmt(right);
+      $("revSegNew").style.width = (nv / mx * 100) + "%";
+      $("revSegNew").textContent = "New = " + fmt(nv) + "  ( = Original × " + fmt(f) + " )";
+    }
+    ["revNew", "revDir", "revY"].forEach(id => $(id).addEventListener("input", renderRev));
+    renderRev();
   </script>
 </body>
 </html>
