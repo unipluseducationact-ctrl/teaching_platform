@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Percentage Playground — Percentage</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <style>
+    :root {
+      --bg: #f4f4f2; --panel: #ffffff; --panel2: #f7f7f5; --ink: #1a1a1a; --dim: #5c5c58;
+      --line: #e3e0d8;
+      --blue: #1976d2; --green: #2e7d32; --orange: #ef6c00; --purple: #6a4fa3; --red: #c62828;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; background: var(--bg); color: var(--ink);
+      font-family: "Hanken Grotesk", system-ui, sans-serif;
+    }
+    header {
+      padding: 18px 28px; border-bottom: 1px solid var(--line);
+      display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    }
+    header h1 { font-size: 22px; margin: 0; font-weight: 700; }
+    header .crumb { color: var(--dim); font-size: 13px; }
+    .back-platform {
+      display: inline-flex; align-items: center; gap: 4px; padding: 7px 12px;
+      border: 1px solid var(--line); border-radius: 999px; background: var(--panel);
+      color: var(--ink); text-decoration: none; font-size: 13px; font-weight: 600;
+    }
+    .back-platform:hover { border-color: var(--blue); color: var(--blue); }
+    main { padding: 20px 28px 48px; max-width: 1120px; margin: 0 auto; }
+
+    .card {
+      background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
+      padding: 18px 22px; margin-bottom: 20px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.06);
+    }
+    .card h2 { margin: 0 0 4px; font-size: 20px; }
+    .card .sub { margin: 0 0 14px; color: var(--dim); }
+    .math { font-family: "JetBrains Mono", monospace; font-weight: 700; }
+    .pill {
+      font-size: 11px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase;
+      padding: 3px 11px; border-radius: 999px; color: #fff; vertical-align: 3px; margin-right: 8px;
+    }
+    .p1 .pill { background: var(--blue); }
+    .p2 .pill { background: var(--purple); }
+    .p3 .pill { background: var(--green); }
+    .p4 .pill { background: var(--orange); }
+
+    .keyline {
+      background: var(--panel2); border: 1px solid var(--line); border-radius: 10px;
+      padding: 10px 14px; margin: 10px 0 14px; line-height: 1.8; font-size: 15px;
+    }
+    .keyline b.f { font-family: "JetBrains Mono", monospace; }
+    .hl-y { background: #fff3c4; border-radius: 4px; padding: 0 4px; }
+    .hl-b { background: #e3f2fd; border-radius: 4px; padding: 0 4px; }
+    .hl-o { background: #ffe0b2; border-radius: 4px; padding: 0 4px; }
+    .hl-g { background: #dcedc8; border-radius: 4px; padding: 0 4px; }
+
+    .controls {
+      display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 12px 0;
+    }
+    .controls label { font-weight: 700; font-size: 14px; }
+    .controls input[type=range] { width: 220px; accent-color: var(--blue); }
+    .controls input[type=number] {
+      width: 92px; padding: 6px 8px; border: 2px solid var(--line); border-radius: 8px;
+      font: 700 15px "JetBrains Mono", monospace; text-align: center;
+    }
+    .controls input[type=number]:focus { outline: none; border-color: var(--blue); }
+    .readout { font: 700 16px "JetBrains Mono", monospace; }
+
+    /* ── part 1: 100-people grid ── */
+    .people-wrap { display: flex; gap: 26px; flex-wrap: wrap; align-items: center; }
+    .people-grid {
+      display: grid; grid-template-columns: repeat(10, 26px); grid-auto-rows: 26px; gap: 4px;
+    }
+    .person {
+      width: 26px; height: 26px; border-radius: 50% 50% 8px 8px;
+      background: #dcdcd6; position: relative; transition: background .15s ease, transform .15s ease;
+    }
+    .person::before {
+      content: ""; position: absolute; top: 3px; left: 50%; transform: translateX(-50%);
+      width: 10px; height: 10px; border-radius: 50%; background: #fff;
+    }
+    .person.on { background: var(--blue); transform: scale(1.06); }
+    .people-side { flex: 1; min-width: 260px; }
+    .big-eq { font-size: 24px; line-height: 1.7; }
+    .people-side p.note { color: var(--dim); font-size: 14px; line-height: 1.6; }
+
+    /* ── part 2: converter ── */
+    .conv-grid {
+      display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 10px; align-items: stretch;
+      max-width: 760px;
+    }
+    .conv-box {
+      border: 2px solid var(--line); border-radius: 14px; padding: 14px; text-align: center;
+      display: flex; flex-direction: column; gap: 8px; background: var(--panel);
+    }
+    .conv-box.active { border-color: var(--purple); box-shadow: 0 0 0 3px #d1c4e955; }
+    .conv-box .t { font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
+    .conv-box input {
+      width: 100%; padding: 8px 6px; border: 2px solid var(--line); border-radius: 8px;
+      font: 700 20px "JetBrains Mono", monospace; text-align: center;
+    }
+    .conv-box input:focus { outline: none; border-color: var(--purple); }
+    .conv-frac-row { display: flex; align-items: center; gap: 6px; justify-content: center; }
+    .conv-frac-row .slash { font: 800 24px "JetBrains Mono", monospace; color: var(--dim); }
+    .conv-arrows { display: grid; place-items: center; font-size: 22px; color: var(--dim); }
+    .conv-steps {
+      margin-top: 14px; background: var(--panel2); border: 1px solid var(--line); border-radius: 10px;
+      padding: 10px 14px; font-size: 17px; min-height: 52px;
+      display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+    }
+    .presets { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    .presets button {
+      cursor: pointer; border: 2px solid var(--line); background: var(--panel); border-radius: 999px;
+      font: 700 13px "JetBrains Mono", monospace; padding: 6px 12px;
+    }
+    .presets button:hover { border-color: var(--purple); color: var(--purple); }
+
+    /* ── part 3: y% of x ── */
+    .of-bar-wrap { margin: 14px 0 6px; }
+    .of-bar {
+      position: relative; height: 56px; border: 2px solid #1b5e20; border-radius: 10px;
+      overflow: hidden; background: repeating-linear-gradient(
+        90deg, #f1f8e9 0, #f1f8e9 calc(1% - 1px), #c8e6c955 calc(1% - 1px), #c8e6c955 1%);
+    }
+    .of-fill {
+      position: absolute; inset: 0 auto 0 0; width: 0%; background: #66bb6acc;
+      border-right: 3px solid #1b5e20; transition: width .2s ease;
+    }
+    .of-caption { display: flex; justify-content: space-between; font-size: 13px; color: var(--dim); margin-top: 6px; font-weight: 600; }
+    .of-eq { margin-top: 12px; font-size: 20px; }
+    .of-note { color: var(--dim); font-size: 14px; line-height: 1.6; margin-top: 8px; }
+
+    /* ── part 4: y% more than x ── */
+    .more-stage { margin: 16px 0 4px; display: grid; gap: 18px; }
+    .bar-row { display: grid; grid-template-columns: 120px 1fr; gap: 12px; align-items: center; }
+    .bar-row .lab { font-weight: 800; font-size: 14px; text-align: right; }
+    .bar-track { position: relative; height: 44px; }
+    .seg {
+      position: absolute; top: 0; bottom: 0; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font: 800 14px "JetBrains Mono", monospace; color: #fff; overflow: hidden; white-space: nowrap;
+      transition: width .25s ease, left .25s ease;
+    }
+    .seg.orig { left: 0; background: var(--blue); }
+    .seg.inc { background: var(--orange); }
+    .seg.new { left: 0; background: var(--green); }
+    .seg.ghost {
+      background: transparent; border: 2px dashed #1976d2aa; color: #1976d2;
+    }
+    .more-eqs {
+      margin-top: 14px; display: grid; gap: 8px; font-size: 16px;
+    }
+    .more-eqs .lhs { display: inline-block; min-width: 132px; font-weight: 800; font-family: "Hanken Grotesk", sans-serif; }
+    .more-eqs .c-orig { color: var(--blue); }
+    .more-eqs .c-inc { color: var(--orange); }
+    .more-eqs .c-new { color: var(--green); }
+    .warn {
+      margin-top: 12px; font-size: 14px; line-height: 1.7; color: var(--dim);
+      background: #fff8e1; border: 1px solid #ffe082; border-radius: 10px; padding: 10px 14px;
+    }
+    .warn b { color: var(--red); }
+
+    @media (max-width: 720px) {
+      .conv-grid { grid-template-columns: 1fr; }
+      .conv-arrows { transform: rotate(90deg); }
+      .bar-row { grid-template-columns: 1fr; }
+      .bar-row .lab { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="back-platform" href="../levels/pre-s1.html">← Pre S1</a>
+    <h1>Percentage Playground</h1>
+    <span class="crumb">Pre S1 Maths · L07–09 Percentage · What % means, conversions, y% of x, y% more than x</span>
+  </header>
+  <main>
+
+    <!-- ── Part 1: what is a percentage ── -->
+    <section class="card p1">
+      <h2><span class="pill">Part 1</span>What is a percentage?</h2>
+      <p class="sub">"Per cent" = per hundred. <b>x%</b> simply means: out of 100 people, <b>x</b> of them.</p>
+      <div class="people-wrap">
+        <div class="people-grid" id="peopleGrid" aria-label="100 people, some highlighted"></div>
+        <div class="people-side">
+          <div class="controls">
+            <label for="pctSlider">x% =</label>
+            <input type="range" id="pctSlider" min="0" max="100" value="37">
+            <span class="readout" id="pctReadout">37%</span>
+          </div>
+          <div class="big-eq" id="pctEq"></div>
+          <p class="note">Drag the slider — the same amount written three ways:
+            a <b>percentage</b> (out of 100), a <b>fraction</b> (over 100), and a <b>decimal</b> (÷ 100).</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Part 2: converter ── -->
+    <section class="card p2">
+      <h2><span class="pill">Part 2</span>Percentage ⇄ Fraction ⇄ Decimal</h2>
+      <p class="sub">Type in any box — the other two follow. Watch the steps below.</p>
+      <div class="conv-grid">
+        <div class="conv-box" id="boxPct">
+          <span class="t">Percentage</span>
+          <input id="inPct" type="text" inputmode="decimal" value="60" aria-label="percentage value"> 
+          <span class="t">%</span>
+        </div>
+        <div class="conv-arrows">⇄</div>
+        <div class="conv-box" id="boxFrac">
+          <span class="t">Fraction</span>
+          <div class="conv-frac-row">
+            <input id="inNum" type="text" inputmode="numeric" value="3" aria-label="numerator" style="width:76px">
+            <span class="slash">/</span>
+            <input id="inDen" type="text" inputmode="numeric" value="5" aria-label="denominator" style="width:76px">
+          </div>
+          <span class="t">simplified</span>
+        </div>
+        <div class="conv-arrows">⇄</div>
+        <div class="conv-box" id="boxDec">
+          <span class="t">Decimal</span>
+          <input id="inDec" type="text" inputmode="decimal" value="0.6" aria-label="decimal value">
+          <span class="t">&nbsp;</span>
+        </div>
+      </div>
+      <div class="conv-steps" id="convSteps"></div>
+      <div class="presets">
+        <button data-kind="pct" data-v="50">50%</button>
+        <button data-kind="pct" data-v="7.1">7.1%</button>
+        <button data-kind="pct" data-v="245">245%</button>
+        <button data-kind="dec" data-v="0.84">0.84</button>
+        <button data-kind="dec" data-v="1.5">1.5</button>
+        <button data-kind="frac" data-v="3/4">3/4</button>
+        <button data-kind="frac" data-v="1/6">1/6</button>
+      </div>
+    </section>
+
+    <!-- ── Part 3: y% of x ── -->
+    <section class="card p3">
+      <h2><span class="pill">Part 3</span>"y% of x" — take y of the 100 parts</h2>
+      <div class="keyline">
+        <b>I am y% of x</b> → <span class="ktx">x \times y\%</span>.<br>
+        Cut <span class="hl-b">x</span> into <b>100 equal parts</b>; keep <span class="hl-y">y</span> of them.
+        Each tiny slice in the bar below is 1% of x.
+      </div>
+      <div class="controls">
+        <label for="ofX">x =</label>
+        <input type="number" id="ofX" value="320" step="1">
+        <label for="ofY">y% =</label>
+        <input type="range" id="ofY" min="0" max="100" value="25">
+        <span class="readout" id="ofYRead">25%</span>
+      </div>
+      <div class="of-bar-wrap">
+        <div class="of-bar"><div class="of-fill" id="ofFill"></div></div>
+        <div class="of-caption">
+          <span>0</span><span id="ofCapMid"></span><span id="ofCapEnd">x = 320</span>
+        </div>
+      </div>
+      <div class="of-eq" id="ofEq"></div>
+      <p class="of-note">Example from class:
+        <span class="ktx">32.5\% \text{ of } 320 = 320 \times \tfrac{32.5}{100} = 104</span>,
+        and <span class="ktx">5\% \text{ of } 30 = 30 \times 0.05 = 1.5</span>.</p>
+    </section>
+
+    <!-- ── Part 4: y% more than x ── -->
+    <section class="card p4">
+      <h2><span class="pill">Part 4</span>"y% more than x" — the base is x</h2>
+      <div class="keyline">
+        <b>I am y% more than x</b> → the <i>extra part</i> is <span class="ktx">x \times y\%</span>,
+        because it is <b>y% <u>of x</u></b> — x is the base (100%).<br>
+        <span class="hl-b">Original</span> + <span class="hl-o">Increase</span> = <span class="hl-g">New</span>:
+        <span class="ktx">x + x \times y\% = x \times (1 + y\%)</span>
+      </div>
+      <div class="controls">
+        <label for="moreX">Original x =</label>
+        <input type="number" id="moreX" value="1200" step="1">
+        <label for="moreY">increase y% =</label>
+        <input type="range" id="moreY" min="0" max="100" value="12">
+        <span class="readout" id="moreYRead">12%</span>
+      </div>
+      <div class="more-stage">
+        <div class="bar-row">
+          <span class="lab">Original</span>
+          <div class="bar-track"><div class="seg orig" id="segOrig">x</div></div>
+        </div>
+        <div class="bar-row">
+          <span class="lab">Increase</span>
+          <div class="bar-track">
+            <div class="seg ghost" id="segGhost">base = x (100%)</div>
+            <div class="seg inc" id="segInc"></div>
+          </div>
+        </div>
+        <div class="bar-row">
+          <span class="lab">New</span>
+          <div class="bar-track"><div class="seg new" id="segNew"></div></div>
+        </div>
+      </div>
+      <div class="more-eqs">
+        <div><span class="lhs c-orig">Original</span>= <span id="eqOrig"></span></div>
+        <div><span class="lhs c-inc">Increase</span>= <span id="eqInc"></span></div>
+        <div><span class="lhs c-new">New</span>= <span id="eqNew"></span></div>
+      </div>
+      <div class="warn">
+        Don't mix them up: the <b>increase</b> is <span class="ktx">x \times y\%</span> (a part),
+        while the <b>new value</b> is <span class="ktx">x \times (1 + y\%)</span> (the whole thing).
+        "12% more than 1200" → increase <span class="ktx">1200 \times 12\% = 144</span>,
+        new value <span class="ktx">1200 \times 1.12 = 1344</span>.
+      </div>
+    </section>
+
+  </main>
+  <script>
+    "use strict";
+    const $ = id => document.getElementById(id);
+    const fmt = n => String(Math.round(n * 1000) / 1000);
+    const tex = (el, src) => katex.render(src, el, { throwOnError: false });
+    const frac = (n, d) => "\\frac{" + n + "}{" + d + "}";
+    document.querySelectorAll(".ktx").forEach(el => tex(el, el.textContent));
+
+    /* ── Part 1 ── */
+    const grid = $("peopleGrid");
+    for (let i = 0; i < 100; i++) {
+      const d = document.createElement("div");
+      d.className = "person";
+      grid.appendChild(d);
+    }
+    const people = [...grid.children];
+    function renderPct() {
+      const x = +$("pctSlider").value;
+      people.forEach((p, i) => p.classList.toggle("on", i < x));
+      $("pctReadout").textContent = x + "%";
+      tex($("pctEq"),
+        "\\textcolor{#1976d2}{" + x + "\\%} = " +
+        "\\textcolor{#6a4fa3}{" + frac(x, 100) + "} = " +
+        "\\textcolor{#2e7d32}{" + fmt(x / 100) + "}");
+    }
+    $("pctSlider").addEventListener("input", renderPct);
+    renderPct();
+
+    /* ── Part 2 ── */
+    // best fraction with a small denominator (continued-fraction expansion)
+    function bestFraction(value, maxDen = 1000) {
+      let h1 = 1, h0 = 0, k1 = 0, k0 = 1, b = value;
+      while (true) {
+        const a = Math.floor(b);
+        const h2 = a * h1 + h0, k2 = a * k1 + k0;
+        if (k2 > maxDen) break;
+        h0 = h1; h1 = h2; k0 = k1; k1 = k2;
+        if (Math.abs(value - h1 / k1) < 1e-12) break;
+        b = 1 / (b - a);
+        if (!isFinite(b)) break;
+      }
+      return [h1, k1];
+    }
+    const boxes = { pct: $("boxPct"), frac: $("boxFrac"), dec: $("boxDec") };
+    function setActive(kind) {
+      for (const k in boxes) boxes[k].classList.toggle("active", k === kind);
+    }
+    function showSteps(kind, pct, num, den, dec, exact) {
+      const P = fmt(pct) + "\\%", D = fmt(dec), F = frac(num, den);
+      const F100 = frac(fmt(pct), 100);
+      const s = exact ? " = " : " \\approx ";   // once rounding starts, stay with ≈
+      let src;
+      if (kind === "pct") {
+        src = P + " = " + F100 + s + F + s + D;
+      } else if (kind === "dec") {
+        src = D + " = " + F100 + s + F +
+              " \\,,\\quad " + D + " \\times 100\\% = " + P;
+      } else {
+        src = F + s + D + " \\,,\\quad " + F + " \\times 100\\%" + s + P;
+      }
+      tex($("convSteps"), src);
+    }
+    function syncFrom(kind) {
+      setActive(kind);
+      let dec, num, den;
+      if (kind === "pct") {
+        dec = parseFloat($("inPct").value) / 100;
+      } else if (kind === "dec") {
+        dec = parseFloat($("inDec").value);
+      } else {
+        num = parseFloat($("inNum").value); den = parseFloat($("inDen").value);
+        if (!den) { $("convSteps").textContent = "Denominator can't be 0"; return; }
+        dec = num / den;
+      }
+      if (!isFinite(dec)) { $("convSteps").textContent = "Type a number…"; return; }
+      if (kind !== "frac") [num, den] = bestFraction(dec);
+      const exact = Math.abs(num / den - dec) < 1e-9 &&
+                    Math.abs(dec - Math.round(dec * 1000) / 1000) < 1e-9;
+      const pct = dec * 100;
+      if (kind !== "pct") $("inPct").value = fmt(pct);
+      if (kind !== "dec") $("inDec").value = fmt(dec);
+      if (kind !== "frac") { $("inNum").value = num; $("inDen").value = den; }
+      showSteps(kind, pct, num, den, dec, exact);
+    }
+    $("inPct").addEventListener("input", () => syncFrom("pct"));
+    $("inDec").addEventListener("input", () => syncFrom("dec"));
+    $("inNum").addEventListener("input", () => syncFrom("frac"));
+    $("inDen").addEventListener("input", () => syncFrom("frac"));
+    document.querySelectorAll(".presets button").forEach(b => {
+      b.addEventListener("click", () => {
+        const kind = b.dataset.kind, v = b.dataset.v;
+        if (kind === "pct") $("inPct").value = v;
+        else if (kind === "dec") $("inDec").value = v;
+        else { const [n, d] = v.split("/"); $("inNum").value = n; $("inDen").value = d; }
+        syncFrom(kind);
+      });
+    });
+    syncFrom("pct");
+
+    /* ── Part 3 ── */
+    function renderOf() {
+      const x = parseFloat($("ofX").value) || 0;
+      const y = +$("ofY").value;
+      $("ofYRead").textContent = y + "%";
+      $("ofFill").style.width = y + "%";
+      $("ofCapEnd").textContent = "x = " + fmt(x);
+      $("ofCapMid").textContent = y + " of the 100 parts";
+      const res = x * y / 100;
+      tex($("ofEq"), fmt(x) + " \\times " + y + "\\% = " + fmt(x) + " \\times " +
+        frac(y, 100) + " = \\textcolor{#2e7d32}{" + fmt(res) + "}");
+    }
+    $("ofX").addEventListener("input", renderOf);
+    $("ofY").addEventListener("input", renderOf);
+    renderOf();
+
+    /* ── Part 4 ── */
+    function renderMore() {
+      const x = parseFloat($("moreX").value) || 0;
+      const y = +$("moreY").value;
+      $("moreYRead").textContent = y + "%";
+      // widths: original bar occupies W%, new bar W*(1+y%), scaled so new fits 100%
+      const scale = 100 / (1 + y / 100);
+      const wOrig = scale, wInc = scale * y / 100;
+      $("segOrig").style.width = wOrig + "%";
+      $("segGhost").style.width = wOrig + "%";
+      const inc = $("segInc");
+      inc.style.left = wOrig + "%";
+      inc.style.width = wInc + "%";
+      inc.textContent = wInc > 8 ? "x × " + y + "%" : "";
+      $("segNew").style.width = (wOrig + wInc) + "%";
+      const incV = x * y / 100, newV = x + incV;
+      $("segOrig").textContent = "x = " + fmt(x);
+      $("segNew").textContent = "x × (1 + " + y + "%) = " + fmt(newV);
+      tex($("eqOrig"), fmt(x) + " \\;\\; \\text{(the base, } 100\\%)");
+      tex($("eqInc"), fmt(x) + " \\times " + y + "\\% = " + fmt(incV));
+      tex($("eqNew"), fmt(x) + " + " + fmt(incV) + " = " + fmt(x) +
+        " \\times (1 + " + y + "\\%) = " + fmt(newV));
+    }
+    $("moreX").addEventListener("input", renderMore);
+    $("moreY").addEventListener("input", renderMore);
+    renderMore();
+  </script>
+</body>
+</html>
